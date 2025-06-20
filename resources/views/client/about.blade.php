@@ -10,12 +10,98 @@
                 <div class="col-md-9 ftco-animate text-center d-flex align-items-end justify-content-center">
                     <div class="text">
                         <p class="breadcrumbs mb-2"><span class="mr-2"><a href="{{ route('index') }}">Home</a></span> <span>About</span></p>
-                        <h1 class="mb-4 bread">About Us</h1>
+                        <h1 class="mb-4 bread">Về Marron Hotel</h1>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <section class="ftco-section bg-light">
+        <div class="container">
+            <div class="row justify-content-center mb-5 pb-3">
+                <div class="col-md-10 heading-section text-center ftco-animate">
+                    <span class="subheading">Giới thiệu</span>
+                    <h2 class="mb-4">Chào mừng đến với Marron Hotel</h2>
+                    <p>Marron Hotel là điểm đến lý tưởng cho kỳ nghỉ dưỡng và công tác của bạn. Chúng tôi cam kết mang đến trải nghiệm lưu trú tuyệt vời với hệ thống phòng nghỉ hiện đại, dịch vụ chuyên nghiệp và không gian sang trọng. Sứ mệnh của chúng tôi là đem lại sự hài lòng tối đa cho mọi khách hàng.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="ftco-section">
+        <div class="container">
+            <div class="row justify-content-center mb-5 pb-3">
+                <div class="col-md-10 heading-section text-center ftco-animate">
+                    <span class="subheading">Sản phẩm & Dịch vụ</span>
+                    <h2 class="mb-4">Các loại phòng nổi bật</h2>
+                    <p>Chúng tôi cung cấp nhiều loại phòng phù hợp với mọi nhu cầu của khách hàng, từ cá nhân, cặp đôi đến gia đình hoặc nhóm bạn.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 col-lg-4 ftco-animate mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">Phòng Đơn Tiêu Chuẩn</h3>
+                            <p class="card-text">Phòng đơn tiêu chuẩn với đầy đủ tiện nghi cơ bản, phù hợp cho 1-2 người.</p>
+                            <ul class="list-unstyled mb-2">
+                                <li><strong>Sức chứa:</strong> 2 người</li>
+                                <li><strong>Giá:</strong> 500.000đ/đêm</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 ftco-animate mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">Phòng Đôi Tiêu Chuẩn</h3>
+                            <p class="card-text">Phòng đôi tiêu chuẩn với 2 giường đơn, thích hợp cho gia đình nhỏ hoặc nhóm bạn.</p>
+                            <ul class="list-unstyled mb-2">
+                                <li><strong>Sức chứa:</strong> 4 người</li>
+                                <li><strong>Giá:</strong> 800.000đ/đêm</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 ftco-animate mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">Phòng Deluxe</h3>
+                            <p class="card-text">Phòng deluxe với thiết kế sang trọng, đầy đủ tiện nghi cao cấp, view đẹp.</p>
+                            <ul class="list-unstyled mb-2">
+                                <li><strong>Sức chứa:</strong> 3 người</li>
+                                <li><strong>Giá:</strong> 1.200.000đ/đêm</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 ftco-animate mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">Phòng Suite</h3>
+                            <p class="card-text">Phòng suite sang trọng bậc nhất với không gian rộng rãi, bao gồm phòng khách và phòng ngủ riêng biệt.</p>
+                            <ul class="list-unstyled mb-2">
+                                <li><strong>Sức chứa:</strong> 4 người</li>
+                                <li><strong>Giá:</strong> 2.000.000đ/đêm</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 ftco-animate mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">Phòng Gia Đình</h3>
+                            <p class="card-text">Phòng gia đình rộng rãi với 2 phòng ngủ, phù hợp cho gia đình 4-6 người.</p>
+                            <ul class="list-unstyled mb-2">
+                                <li><strong>Sức chứa:</strong> 6 người</li>
+                                <li><strong>Giá:</strong> 1.500.000đ/đêm</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <section class="ftco-section ftco-counter img" id="section-counter" style="background-image: url(client/images/bg_2.jpg);">
         <div class="container">

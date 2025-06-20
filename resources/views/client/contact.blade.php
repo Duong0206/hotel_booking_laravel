@@ -19,55 +19,71 @@
 
     <section class="ftco-section contact-section bg-light">
         <div class="container">
-            <div class="row d-flex mb-5 contact-info">
-                <div class="col-md-12 mb-4">
-                    <h2 class="h3">Contact Information</h2>
-                </div>
-                <div class="w-100"></div>
-                <div class="col-md-3 d-flex">
-                    <div class="info bg-white p-4">
-                        <p><span>Address:</span> 198 West 21th Street, Suite 721 New York NY 10016</p>
-                    </div>
-                </div>
-                <div class="col-md-3 d-flex">
-                    <div class="info bg-white p-4">
-                        <p><span>Phone:</span> <a href="tel://1234567920">+ 1235 2355 98</a></p>
-                    </div>
-                </div>
-                <div class="col-md-3 d-flex">
-                    <div class="info bg-white p-4">
-                        <p><span>Email:</span> <a href="mailto:info@yoursite.com">info@yoursite.com</a></p>
-                    </div>
-                </div>
-                <div class="col-md-3 d-flex">
-                    <div class="info bg-white p-4">
-                        <p><span>Website</span> <a href="#">yoursite.com</a></p>
-                    </div>
+            <div class="row justify-content-center mb-5 pb-3">
+                <div class="col-md-8 heading-section text-center ftco-animate">
+                    <h2 class="mb-4">Liên hệ với Marron Hotel</h2>
+                    <p>Chúng tôi luôn sẵn sàng lắng nghe ý kiến và hỗ trợ bạn!</p>
                 </div>
             </div>
-            <div class="row block-9">
-                <div class="col-md-6 order-md-last d-flex">
-                    <form action="#" class="bg-white p-5 contact-form">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Your Name">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Your Email">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Subject">
-                        </div>
-                        <div class="form-group">
-                            <textarea name="" id="" cols="30" rows="7" class="form-control" placeholder="Message"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <input type="submit" value="Send Message" class="btn btn-primary py-3 px-5">
-                        </div>
-                    </form>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-lg border-0 rounded-lg p-4 h-100">
+                        <form action="{{ route('contact.send') }}" method="POST" class="contact-form">
+                            @csrf
+                            <div class="form-group mb-3">
+                                <label for="name" class="font-weight-bold">Họ tên</label>
+                                <input type="text" name="name" class="form-control rounded-pill" placeholder="Nhập họ tên của bạn" required>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="email" class="font-weight-bold">Email</label>
+                                <input type="email" name="email" class="form-control rounded-pill" placeholder="Nhập email" required>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="subject" class="font-weight-bold">Chủ đề</label>
+                                <input type="text" name="subject" class="form-control rounded-pill" placeholder="Chủ đề liên hệ" required>
+                            </div>
+                            <div class="form-group mb-4">
+                                <label for="message" class="font-weight-bold">Nội dung</label>
+                                <textarea name="message" cols="30" rows="5" class="form-control rounded" placeholder="Nội dung liên hệ..." required></textarea>
+                            </div>
+                            <div class="form-group text-center">
+                                <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill shadow-sm" style="transition:0.3s;">Gửi liên hệ</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-
-                <div class="col-md-6 d-flex">
-                    <div id="map" class="bg-white" style="height: 400px;"></div>
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-lg border-0 rounded-lg p-4 h-100 bg-primary text-white">
+                        <h4 class="mb-4"><i class="icon-info-circle mr-2"></i> Thông tin liên hệ</h4>
+                        <div class="mb-3 d-flex align-items-center">
+                            <span class="icon-map-marker display-4 mr-3"></span>
+                            <div>
+                                <div class="font-weight-bold">Địa chỉ</div>
+                                198 West 21th Street, Suite 721 New York NY 10016
+                            </div>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <span class="icon-phone display-4 mr-3"></span>
+                            <div>
+                                <div class="font-weight-bold">Điện thoại</div>
+                                <a href="tel://1234567920" class="text-white">+ 1235 2355 98</a>
+                            </div>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <span class="icon-envelope display-4 mr-3"></span>
+                            <div>
+                                <div class="font-weight-bold">Email</div>
+                                <a href="mailto:info@yoursite.com" class="text-white">info@yoursite.com</a>
+                            </div>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <span class="icon-globe display-4 mr-3"></span>
+                            <div>
+                                <div class="font-weight-bold">Website</div>
+                                <a href="#" class="text-white">yoursite.com</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

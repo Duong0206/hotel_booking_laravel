@@ -29,7 +29,7 @@ class HotelController extends Controller
     }
 
     public function restaurant()
-    {   
+    {
         return view('client.restaurant');
     }
 
@@ -54,20 +54,20 @@ class HotelController extends Controller
         if (!$id) {
             return redirect()->route('rooms');
         }
-        
+
         // Lấy thông tin chi tiết phòng
         $room = $this->roomRepository->findById($id);
-        
+
         if (!$room) {
             return redirect()->route('rooms')->with('error', 'Không tìm thấy phòng');
         }
-        
+
         // Lấy các phòng khác cùng loại
         $relatedRooms = $this->roomRepository->getAll()
             ->where('room_type_id', $room->room_type_id)
             ->where('id', '!=', $room->id)
             ->take(2);
-        
+
         return view('client.rooms-single', compact('room', 'relatedRooms'));
     }
 

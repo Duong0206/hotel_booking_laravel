@@ -171,7 +171,7 @@
                 <h3 class="heading mb-3">25/7 Front Desk</h3>
                 <p>A small river named Duden flows by their place and supplies.</p>
               </div>
-            </div>      
+            </div>
           </div>
           <div class="col-md-3 d-flex align-self-stretch ftco-animate">
             <div class="media block-6 services py-4 d-block text-center">
@@ -184,7 +184,7 @@
                 <h3 class="heading mb-3">Restaurant Bar</h3>
                 <p>A small river named Duden flows by their place and supplies.</p>
               </div>
-            </div>    
+            </div>
           </div>
           <div class="col-md-3 d-flex align-sel Searchf-stretch ftco-animate">
             <div class="media block-6 services py-4 d-block text-center">
@@ -197,7 +197,7 @@
                 <h3 class="heading mb-3">Transfer Services</h3>
                 <p>A small river named Duden flows by their place and supplies.</p>
               </div>
-            </div>      
+            </div>
           </div>
           <div class="col-md-3 d-flex align-self-stretch ftco-animate">
             <div class="media block-6 services py-4 d-block text-center">
@@ -210,7 +210,7 @@
                 <h3 class="heading mb-3">Spa Suites</h3>
                 <p>A small river named Duden flows by their place and supplies.</p>
               </div>
-            </div>      
+            </div>
           </div>
         </div>
       </div>
@@ -222,7 +222,7 @@
                 <div class="col-md-7 heading-section text-center ftco-animate">
                     <h2 class="mb-4">Phòng Nổi Bật</h2>
                 </div>
-            </div>    
+            </div>
             <div class="row">
                 @foreach($rooms as $room)
                 <div class="col-sm col-md-6 col-lg-4 ftco-animate">
@@ -298,6 +298,52 @@
     	</div>
     </section>
 
+    <!-- Section Giới thiệu khách sạn -->
+    <section class="ftco-section bg-light">
+      <div class="container">
+        <div class="row justify-content-center mb-5 pb-3">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+            <span class="subheading">Về Chúng Tôi</span>
+            <h2 class="mb-4">Chào mừng đến với Deluxe Hotel</h2>
+            <p>Deluxe Hotel là điểm đến lý tưởng cho kỳ nghỉ dưỡng và công tác của bạn. Chúng tôi cung cấp hệ thống phòng nghỉ hiện đại, dịch vụ chuyên nghiệp và không gian sang trọng, mang đến trải nghiệm tuyệt vời cho mọi khách hàng.</p>
+            <a href="{{ route('about') }}" class="btn btn-primary mt-3">Xem thêm</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Liên hệ khách sạn -->
+    <section class="ftco-section contact-section">
+      <div class="container">
+        <div class="row justify-content-center mb-5 pb-3">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+            <span class="subheading">Liên hệ</span>
+            <h2 class="mb-4">Thông tin liên hệ</h2>
+            <p>Liên hệ với chúng tôi để được hỗ trợ nhanh nhất!</p>
+          </div>
+        </div>
+        <div class="row d-flex contact-info">
+          <div class="col-md-4 d-flex ftco-animate">
+            <div class="info bg-white p-4 w-100 text-center">
+              <div class="icon mb-2"><span class="icon-map-marker"></span></div>
+              <p><span>Địa chỉ:</span> 198 West 21th Street, Suite 721 New York NY 10016</p>
+            </div>
+          </div>
+          <div class="col-md-4 d-flex ftco-animate">
+            <div class="info bg-white p-4 w-100 text-center">
+              <div class="icon mb-2"><span class="icon-phone"></span></div>
+              <p><span>Điện thoại:</span> <a href="tel://1234567920">+ 1235 2355 98</a></p>
+            </div>
+          </div>
+          <div class="col-md-4 d-flex ftco-animate">
+            <div class="info bg-white p-4 w-100 text-center">
+              <div class="icon mb-2"><span class="icon-envelope"></span></div>
+              <p><span>Email:</span> <a href="mailto:info@yoursite.com">info@yoursite.com</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section class="ftco-section testimony-section bg-light">
       <div class="container">
@@ -448,53 +494,6 @@
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="instagram">
-      <div class="container-fluid">
-        <div class="row no-gutters justify-content-center pb-5">
-          <div class="col-md-7 text-center heading-section ftco-animate">
-            <h2><span>Instagram</span></h2>
-          </div>
-        </div>
-        <div class="row no-gutters">
-          <div class="col-sm-12 col-md ftco-animate">
-            <a href="client/images/insta-1.jpg" class="insta-img image-popup" style="background-image: url(client/images/insta-1.jpg);">
-              <div class="icon d-flex justify-content-center">
-                <span class="icon-instagram align-self-center"></span>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-12 col-md ftco-animate">
-            <a href="client/images/insta-2.jpg" class="insta-img image-popup" style="background-image: url(client/images/insta-2.jpg);">
-              <div class="icon d-flex justify-content-center">
-                <span class="icon-instagram align-self-center"></span>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-12 col-md ftco-animate">
-            <a href="client/images/insta-3.jpg" class="insta-img image-popup" style="background-image: url(client/images/insta-3.jpg);">
-              <div class="icon d-flex justify-content-center">
-                <span class="icon-instagram align-self-center"></span>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-12 col-md ftco-animate">
-            <a href="client/images/insta-4.jpg" class="insta-img image-popup" style="background-image: url(client/images/insta-4.jpg);">
-              <div class="icon d-flex justify-content-center">
-                <span class="icon-instagram align-self-center"></span>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-12 col-md ftco-animate">
-            <a href="client/images/insta-5.jpg" class="insta-img image-popup" style="background-image: url(client/images/insta-5.jpg);">
-              <div class="icon d-flex justify-content-center">
-                <span class="icon-instagram align-self-center"></span>
-              </div>
-            </a>
           </div>
         </div>
       </div>

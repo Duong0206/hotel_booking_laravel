@@ -27,6 +27,7 @@ Route::get('/blog', [HotelController::class, 'blog'])->name('blog');
 Route::get('/about', [HotelController::class, 'about'])->name('about');
 
 Route::get('/contact', [HotelController::class, 'contact'])->name('contact');
+Route::post('/contact', [HotelController::class, 'sendContact'])->name('contact.send');
 
 Route::get('/rooms-single/{id?}', [HotelController::class, 'roomsSingle'])->name('rooms-single');
 
@@ -37,7 +38,7 @@ Route::middleware('guest')->group(function () {
     // Đăng nhập
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
-    
+
     // Đăng ký
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register']);
@@ -50,11 +51,11 @@ Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->
 Route::middleware('auth')->group(function () {
     Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
         ->name('verification.notice');
-        
+
     Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
-        
+
     Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
@@ -73,7 +74,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     // Dashboard
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
-    
+
     // Quản lý đặt phòng
     Route::get('bookings/report', [AdminBookingController::class, 'report'])->name('bookings.report');
     Route::patch('bookings/{id}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.update-status');
