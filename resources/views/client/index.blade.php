@@ -216,6 +216,245 @@
       </div>
     </section>
 
+    <!-- Section Khuyến Mãi Nổi Bật -->
+    <style>
+        .coupon-card {
+            background: linear-gradient(135deg, #8D703B 0%, #A68650 100%);
+            border-radius: 15px;
+            padding: 0;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(141, 112, 59, 0.3);
+            transition: all 0.3s ease;
+            border: 2px solid #8D703B;
+        }
+
+        .coupon-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(141, 112, 59, 0.4);
+            border-color: #FFFFFF;
+        }
+
+        .coupon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .coupon-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .discount-badge {
+            background: linear-gradient(45deg, #8D703B, #6B5530);
+            color: #FFFFFF;
+            font-size: 3.5rem;
+            font-weight: bold;
+            padding: 20px;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            position: relative;
+            animation: pulse 2s infinite;
+            border: 3px solid #FFFFFF;
+            box-shadow: 0 5px 15px rgba(141, 112, 59, 0.3);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .coupon-content {
+            background: #FFFFFF;
+            padding: 30px 20px;
+            border-radius: 0 0 15px 15px;
+            position: relative;
+        }
+
+        .coupon-code-box {
+            background: #8D703B;
+            color: #FFFFFF;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #FFFFFF;
+        }
+
+        .coupon-code-box::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -5px;
+            right: -5px;
+            height: 2px;
+            background: repeating-linear-gradient(
+                to right,
+                transparent,
+                transparent 5px,
+                #FFFFFF 5px,
+                #FFFFFF 10px
+            );
+        }
+
+        .btn-coupon {
+            background: #8D703B;
+            border: 2px solid #8D703B;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: #FFFFFF;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-coupon:hover {
+            background: #FFFFFF;
+            color: #8D703B;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(141, 112, 59, 0.4);
+        }
+
+        .expire-date {
+            background: rgba(141, 112, 59, 0.1);
+            color: #8D703B;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px 0;
+            border: 1px solid rgba(141, 112, 59, 0.3);
+        }
+
+        .floating-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: rgba(255,255,255,0.8);
+            font-size: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .coupon-title {
+            color: #8D703B;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .special-offers-title {
+            position: relative;
+            display: inline-block;
+            color: #8D703B;
+        }
+
+        .special-offers-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: #8D703B;
+            border-radius: 2px;
+        }
+
+        .promotion-subheading {
+            color: #8D703B !important;
+            font-weight: bold;
+        }
+
+        .promotion-description {
+            color: #6B5530;
+        }
+    </style>
+
+    <section class="ftco-section bg-light">
+        <div class="container">
+            <div class="row justify-content-center mb-5 pb-3">
+                <div class="col-md-7 heading-section text-center ftco-animate">
+                    <span class="subheading promotion-subheading">🎉 Ưu Đãi Đặc Biệt</span>
+                    <h2 class="mb-4 special-offers-title">Khuyến Mãi Nổi Bật</h2>
+                    <p class="promotion-description">Đừng bỏ lỡ những ưu đãi hấp dẫn dành riêng cho bạn!</p>
+                </div>
+            </div>
+            <div class="row">
+                @if($coupons->count() > 0)
+                    @foreach($coupons as $coupon)
+                    <div class="col-md-4 ftco-animate">
+                        <div class="coupon-card">
+                            <div class="floating-icon">
+                                <i class="icon-gift"></i>
+                            </div>
+                            <div class="text-center" style="padding: 20px 20px 0;">
+                                <div class="discount-badge">
+                                    {{ $coupon->discount }}%
+                                </div>
+                            </div>
+                            <div class="coupon-content">
+                                <h3 class="coupon-title text-center">{{ $coupon->code }}</h3>
+                                <p class="text-center promotion-description" style="margin-bottom: 15px;">
+                                    Giảm {{ $coupon->discount }}% cho đặt phòng
+                                </p>
+                                
+                                <div class="text-center">
+                                    <span class="expire-date">
+                                        <i class="icon-clock-o mr-1"></i>
+                                        Hết hạn: {{ $coupon->expired_at->format('d/m/Y') }}
+                                    </span>
+                                </div>
+
+                                <div class="coupon-code-box text-center">
+                                    <small style="opacity: 0.9;">Mã khuyến mãi</small><br>
+                                    <strong style="font-size: 1.3rem; letter-spacing: 2px;">{{ $coupon->code }}</strong>
+                                </div>
+
+                                <div class="text-center">
+                                    <a href="{{ route('booking') }}" class="btn btn-coupon">
+                                        <i class="icon-calendar mr-2"></i>
+                                        Đặt phòng ngay
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                @else
+                    <div class="col-12 text-center">
+                        <div style="padding: 60px 20px; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                            <i class="icon-gift" style="font-size: 4rem; color: #bdc3c7; margin-bottom: 20px;"></i>
+                            <p style="color: #7f8c8d; font-size: 1.2rem;">Hiện tại chưa có khuyến mãi nào.</p>
+                            <p style="color: #95a5a6;">Hãy quay lại sau để không bỏ lỡ những ưu đãi hấp dẫn!</p>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </section>
+
     <section class="ftco-section">
         <div class="container">
             <div class="row justify-content-center mb-5 pb-3">

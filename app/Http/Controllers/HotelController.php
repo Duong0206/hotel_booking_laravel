@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Interfaces\Repositories\RoomRepositoryInterface;
+use App\Models\Coupon;
 
 class HotelController extends Controller
 {
@@ -18,7 +19,14 @@ class HotelController extends Controller
     {
         // Lấy 6 phòng ngẫu nhiên để hiển thị ở trang chủ
         $rooms = $this->roomRepository->getAll()->shuffle()->take(6);
-        return view('client.index', compact('rooms'));
+        
+        // Lấy 3 khuyến mãi nổi bật (còn hiệu lực)
+        $coupons = Coupon::active()
+                         ->orderBy('discount', 'desc')
+                         ->take(3)
+                         ->get();
+        
+        return view('client.index', compact('rooms', 'coupons'));
     }
 
     public function rooms()
