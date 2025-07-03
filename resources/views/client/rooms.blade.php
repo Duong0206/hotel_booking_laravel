@@ -36,7 +36,8 @@
                                 <div class="col-sm col-md-6 col-lg-4 ftco-animate">
                                     <div class="room">
                                         {{-- Đường dẫn và hình ảnh phòng --}}
-                                        <a href="{{ route('rooms-single', $type->id) }}"
+                                        <a href="{{ route('rooms-single', ['typeId' => $type->id]) }}"
+                                            class="img d-flex justify-content-center align-items-center"
                                             class="img d-flex justify-content-center align-items-center"
                                             style="background-image: url(client/images/room-{{ ($loop->iteration % 6) + 1 }}.jpg);">
                                             <div class="icon d-flex justify-content-center align-items-center">
@@ -45,7 +46,7 @@
                                         </a>
                                         <div class="text p-3 text-center">
                                             <h3 class="mb-3">
-                                                <a href="{{ route('rooms-single', $type->id) }}">
+                                                <a href="{{ route('rooms-single', ['typeId' => $type->id]) }}">
                                                     {{ $type->name }}
                                                 </a>
                                             </h3>
@@ -58,9 +59,7 @@
                                             </ul>
                                             <hr>
                                             <p class="pt-1">
-                                                <a href="{{ route('rooms-single', $type->id) }}" class="btn-custom">
-                                                    Chi tiết <span class="icon-long-arrow-right"></span>
-                                                </a>
+                                                <a href="route('rooms-single', ['typeId' => $type->id])" class="btn-custom">Chi tiết</a>
                                                 @if ($type->status == 'available')
                                                     <a href="{{ route('booking') }}" class="btn-custom ml-2">
                                                         Đặt ngay <span class="icon-long-arrow-right"></span>

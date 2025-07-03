@@ -31,7 +31,7 @@ Route::get('/about', [HotelController::class, 'about'])->name('about');
 
 Route::get('/contact', [HotelController::class, 'contact'])->name('contact');
 
-Route::get('/rooms-single/{id?}', [HotelController::class, 'roomsSingle'])->name('rooms-single');
+Route::get('/rooms-single/{typeId}', [HotelController::class, 'roomsSingle'])->name('rooms-single');
 
 Route::get('/blog-single', [HotelController::class, 'blogSingle'])->name('blog-single');
 
