@@ -28,4 +28,12 @@ class RoomType extends Model
     {
         return $this->hasMany(Room::class);
     }
+
+    /**
+     * Quan hệ với các khuyến mại có thể áp dụng cho loại phòng này
+     */
+    public function promotions()
+    {
+        return $this->belongsToMany(Promotion::class, 'promotion_room_type');
+    }
 } 

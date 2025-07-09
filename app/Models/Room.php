@@ -61,6 +61,14 @@ class Room extends Model
     {
         return $this->hasOne(RoomImage::class)->orderBy('is_primary', 'desc')->orderBy('id', 'asc');
     }
+
+    /**
+     * Quan hệ với các khuyến mại có thể áp dụng cho phòng này
+     */
+    public function promotions()
+    {
+        return $this->belongsToMany(Promotion::class, 'promotion_room');
+    }
     
     // /**
     //  * Lấy dịch vụ của phòng

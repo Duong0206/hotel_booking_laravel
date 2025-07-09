@@ -255,6 +255,86 @@
         </div>
     </section>
 
+    {{-- Section Khuyến mại nổi bật --}}
+    @if($featuredPromotions && $featuredPromotions->count() > 0)
+    <section class="ftco-section bg-light">
+        <div class="container">
+            <div class="row justify-content-center mb-5 pb-3">
+                <div class="col-md-7 text-center heading-section ftco-animate">
+                    <span class="subheading">Ưu Đãi Đặc Biệt</span>
+                    <h2 class="mb-4">Khuyến Mại Nổi Bật</h2>
+                    <p>Đừng bỏ lỡ những ưu đãi hấp dẫn dành riêng cho bạn. Tiết kiệm chi phí cho kỳ nghỉ hoàn hảo!</p>
+                </div>
+            </div>
+            <div class="row">
+                @foreach($featuredPromotions as $promotion)
+                <div class="col-md-6 col-lg-4 ftco-animate">
+                    <div class="promotion-card">
+                        <div class="card h-100 shadow">
+                            @if($promotion->image)
+                                <img src="{{ asset('storage/' . $promotion->image) }}" class="card-img-top" alt="{{ $promotion->title }}" style="height: 200px; object-fit: cover;">
+                            @else
+                                <div class="card-img-top bg-gradient-primary d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <div class="text-white text-center">
+                                        <i class="fas fa-percentage fa-3x mb-2"></i>
+                                        <h3>{{ $promotion->discount_text }}</h3>
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">{{ $promotion->title }}</h5>
+                                    <span class="badge badge-success">{{ $promotion->discount_text }}</span>
+                                </div>
+                                
+                                <p class="card-text text-muted flex-grow-1">
+                                    {{ Str::limit($promotion->description, 100) }}
+                                </p>
+                                
+                                <div class="promotion-info mb-3">
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-calendar-alt"></i> 
+                                        Hết hạn: {{ $promotion->expired_at->format('d/m/Y') }}
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-tag"></i> 
+                                        Mã: <strong>{{ $promotion->code }}</strong>
+                                    </small>
+                                    @if($promotion->minimum_amount > 0)
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-money-bill"></i> 
+                                            Đơn tối thiểu: {{ number_format($promotion->minimum_amount, 0, ',', '.') }}đ
+                                        </small>
+                                    @endif
+                                </div>
+                                
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ route('promotions.show', $promotion->id) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </a>
+                                    <a href="{{ route('booking') }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-hotel"></i> Đặt phòng ngay
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12 text-center mt-4">
+                    <a href="{{ route('promotions.index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-gift"></i> Xem tất cả khuyến mại
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    @endif
+
     <section class="ftco-section ftco-counter img" id="section-counter" style="background-image: url(client/images/bg_1.jpg);">
     	<div class="container">
     		<div class="row justify-content-center">
@@ -499,5 +579,44 @@
         </div>
       </div>
     </section>
+
+<style>
+.promotion-card .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+}
+
+.promotion-card .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+}
+
+.badge-success {
+    background-color: #28a745;
+    font-size: 0.9em;
+}
+
+.promotion-info small {
+    margin-bottom: 5px;
+}
+
+.promotion-info i {
+    width: 15px;
+    text-align: center;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+</style>
 
 @endsection

@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\AdminRoomController;
 use App\Http\Controllers\Admin\AdminBookingController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 // Route::get('/', function () {
 //     return view('client.index');
@@ -86,6 +88,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     // Routes cho quản lý ảnh phòng
     Route::delete('rooms/{room}/images/{image}', [AdminRoomController::class, 'deleteImage'])->name('rooms.images.delete');
     Route::post('rooms/{room}/images/{image}/primary', [AdminRoomController::class, 'setPrimaryImage'])->name('rooms.images.primary');
+
+    // Quản lý khuyến mại
+    Route::resource('promotions', App\Http\Controllers\Admin\AdminPromotionController::class);
+    Route::post('promotions/{promotion}/toggle-status', [App\Http\Controllers\Admin\AdminPromotionController::class, 'toggleStatus'])->name('promotions.toggle-status');
+    Route::post('promotions/bulk-action', [App\Http\Controllers\Admin\AdminPromotionController::class, 'bulkAction'])->name('promotions.bulk-action');
 });
 
 // Password reset routes
@@ -115,3 +122,10 @@ Route::get('/search-rooms', [RoomController::class, 'search'])->name('rooms.sear
 // Payment
 Route::get('/confirm-info-payment/{booking}', [PaymentController::class, 'confirmInfo'])->name('confirm-info-payment');
 Route::get('/payment-method/{booking}', [PaymentController::class, 'paymentMethod'])->name('payment-method');
+
+// Promotions
+Route::get('/promotions', [App\Http\Controllers\PromotionController::class, 'index'])->name('promotions.index');
+Route::get('/promotions/{id}', [App\Http\Controllers\PromotionController::class, 'show'])->name('promotions.show');
+Route::post('/promotions/validate-code', [App\Http\Controllers\PromotionController::class, 'validateCode'])->name('promotions.validate-code');
+Route::get('/api/promotions/featured', [App\Http\Controllers\PromotionController::class, 'getFeatured'])->name('promotions.featured');
+

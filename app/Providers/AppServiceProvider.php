@@ -98,6 +98,28 @@ class AppServiceProvider extends ServiceProvider
             \App\Interfaces\Services\Admin\AdminRoomTypeServiceInterface::class,
             \App\Services\Admin\AdminRoomTypeService::class
         );
+
+        // Promotion Bindings
+        $this->app->bind(
+            \App\Interfaces\Repositories\PromotionRepositoryInterface::class,
+            \App\Repositories\PromotionRepository::class
+        );
+
+        $this->app->bind(
+            \App\Interfaces\Services\PromotionServiceInterface::class,
+            \App\Services\PromotionService::class
+        );
+
+        // Admin Promotion Bindings
+        $this->app->bind(
+            \App\Interfaces\Repositories\Admin\AdminPromotionRepositoryInterface::class,
+            \App\Repositories\Admin\AdminPromotionRepository::class
+        );
+
+        $this->app->bind(
+            \App\Interfaces\Services\Admin\AdminPromotionServiceInterface::class,
+            \App\Services\Admin\AdminPromotionService::class
+        );
     }
 
     /**

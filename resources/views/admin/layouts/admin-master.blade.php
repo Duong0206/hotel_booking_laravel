@@ -665,6 +665,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.promotions.*') ? 'active' : '' }}" href="{{ route('admin.promotions.index') }}">
+                                <i class="fas fa-percentage"></i> Khuyến mại
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="#">
                                 <i class="fas fa-users"></i> Người dùng
                             </a>

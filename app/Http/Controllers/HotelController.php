@@ -4,21 +4,30 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Interfaces\Repositories\RoomRepositoryInterface;
+use App\Interfaces\Services\PromotionServiceInterface;
 
 class HotelController extends Controller
 {
     protected $roomRepository;
+    protected $promotionService;
 
-    public function __construct(RoomRepositoryInterface $roomRepository)
-    {
+    public function __construct(
+        RoomRepositoryInterface $roomRepository,
+        PromotionServiceInterface $promotionService
+    ) {
         $this->roomRepository = $roomRepository;
+        $this->promotionService = $promotionService;
     }
 
     public function index()
     {
         // Lấy 6 phòng ngẫu nhiên để hiển thị ở trang chủ
         $rooms = $this->roomRepository->getAll()->shuffle()->take(6);
-        return view('client.index', compact('rooms'));
+        
+        // Lấy khuyến mại nổi bật
+        $featuredPromotions = $this->promotionService->getFeaturedPromotions(3);
+        
+        return view('client.index', compact('rooms', 'featuredPromotions'));
     }
 
     public function rooms()
