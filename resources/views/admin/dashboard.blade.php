@@ -124,18 +124,15 @@
                                 <td>{{ $booking->room->name ?? 'N/A' }}</td>
                                 <td>{{ $booking->check_in_date->format('d/m/Y') }}</td>
                                 <td>
-                                    <span class="badge bg-{{ 
+                                                                        <span class="badge bg-{{ 
                                         $booking->status == 'pending' ? 'warning' : 
                                         ($booking->status == 'confirmed' ? 'primary' : 
+                                        ($booking->status == 'checked_in' ? 'info' :
+                                        ($booking->status == 'checked_out' ? 'secondary' :
                                         ($booking->status == 'completed' ? 'success' : 
-                                        ($booking->status == 'no-show' ? 'dark' : 'danger'))) 
+                                        ($booking->status == 'no_show' ? 'dark' : 'danger'))))) 
                                     }}">
-                                        {{ 
-                                            $booking->status == 'pending' ? 'Chờ xác nhận' : 
-                                            ($booking->status == 'confirmed' ? 'Đã xác nhận' : 
-                                            ($booking->status == 'completed' ? 'Hoàn thành' : 
-                                            ($booking->status == 'no-show' ? 'Không đến' : 'Đã hủy'))) 
-                                        }}
+                                        {{ $booking->status_text }}
                                     </span>
                                 </td>
                                 <td>

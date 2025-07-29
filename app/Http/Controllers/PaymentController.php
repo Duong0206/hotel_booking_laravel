@@ -18,7 +18,7 @@ class PaymentController extends Controller
     {
         try {
             $booking = $this->bookingService->getBookingDetail($id);
-            return view('client.confirm-info-payment', compact('booking'));
+            return view('client.booking.confirm-payment', compact('booking'));
         } catch (\Exception $e) {
             return redirect()->route('index')->withErrors(['message' => $e->getMessage()]);
         }
@@ -27,6 +27,6 @@ class PaymentController extends Controller
     public function paymentMethod($bookingId)
     {
         $booking = $this->bookingService->getBookingDetail($bookingId);
-        return view('client.payment-method', compact('booking'));
+        return view('client.booking.payment-method', compact('booking'));
     }
 }

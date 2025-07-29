@@ -72,10 +72,12 @@
                     <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
                         <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Chờ xác nhận</option>
                         <option value="confirmed" {{ old('status') == 'confirmed' ? 'selected' : '' }}>Đã xác nhận</option>
-                        <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Hoàn thành</option>
-                        <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
-                        <option value="no-show" {{ old('status') == 'no-show' ? 'selected' : '' }}>Không đến</option>
                     </select>
+                    <div class="form-text">
+                        <strong>Hướng dẫn:</strong><br>
+                        • <strong>Chờ xác nhận:</strong> Khách đã đặt phòng, chờ admin xác nhận<br>
+                        • <strong>Đã xác nhận:</strong> Admin đã xác nhận đặt phòng ngay lập tức
+                    </div>
                     @error('status')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

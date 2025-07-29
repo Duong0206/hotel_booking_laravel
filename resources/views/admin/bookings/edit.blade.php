@@ -74,23 +74,59 @@
             
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="status" class="form-label">Trạng thái</label>
+                    <label for="status" class="form-label">Trạng thái đặt phòng</label>
                     <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
-                        <option value="pending" {{ (old('status', $booking->status) == 'pending') ? 'selected' : '' }}>Chờ xác nhận</option>
-                        <option value="confirmed" {{ (old('status', $booking->status) == 'confirmed') ? 'selected' : '' }}>Đã xác nhận</option>
-                        <option value="completed" {{ (old('status', $booking->status) == 'completed') ? 'selected' : '' }}>Hoàn thành</option>
-                        <option value="cancelled" {{ (old('status', $booking->status) == 'cancelled') ? 'selected' : '' }}>Đã hủy</option>
-                        <option value="no-show" {{ (old('status', $booking->status) == 'no-show') ? 'selected' : '' }}>Không đến</option>
+                        <option value="{{ $booking->status }}" selected>{{ $booking->status_text }} (Hiện tại)</option>
+                        @foreach($validNextStatuses as $status => $label)
+                            <option value="{{ $status }}" {{ (old('status') == $status) ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
                     </select>
+                    <div class="form-text">
+                        <strong>Hướng dẫn chuyển trạng thái:</strong><br>
+                        • <strong>Thứ tự đề xuất:</strong> Chờ xác nhận → Đã xác nhận → Đã nhận phòng → Đã trả phòng → Hoàn thành<br>
+                        • <strong>Chuyển linh hoạt:</strong> Có thể chuyển sang bất kỳ trạng thái nào phía trước<br>
+                        • <strong>Chuyển đặc biệt:</strong> Có thể chuyển sang "Đã hủy" hoặc "Khách không đến" ở bất kỳ trạng thái nào<br>
+                        • <strong>Không được lùi:</strong> Không thể chuyển về trạng thái trước đó
+                        <br><small class="text-muted">Trạng thái hiện tại: <strong>{{ $booking->status_text }}</strong></small>
+                    </div>
                     @error('status')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                    @if(empty($validNextStatuses))
+                        <div class="alert alert-warning mt-2">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Lưu ý:</strong> Booking đã ở trạng thái cuối cùng. Chỉ có thể chuyển sang "Đã hủy" hoặc "Khách không đến".
+                        </div>
+                    @else
+                        <div class="alert alert-success mt-2">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Thông tin:</strong> Có <strong>{{ count($validNextStatuses) }}</strong> trạng thái có thể chuyển đổi từ trạng thái hiện tại.
+                            <br><small class="text-muted">Các trạng thái có thể chuyển: 
+                                @foreach($validNextStatuses as $status => $label)
+                                    <span class="badge bg-light text-dark me-1">{{ $label }}</span>
+                                @endforeach
+                            </small>
+                        </div>
+                    @endif
                 </div>
                 
                 <div class="col-md-6">
                     <label class="form-label">Tổng tiền hiện tại</label>
                     <div class="form-control bg-light">{{ number_format($booking->price, 0, ',', '.') }} VNĐ</div>
                     <small class="text-muted">Tổng tiền sẽ được tính lại nếu thay đổi phòng hoặc ngày</small>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label for="admin_notes" class="form-label">Ghi chú quản lý</label>
+                    <textarea name="admin_notes" id="admin_notes" class="form-control @error('admin_notes') is-invalid @enderror" rows="3" placeholder="Ghi chú nội bộ cho quản lý (khách hàng không thấy)">{{ old('admin_notes', $booking->admin_notes) }}</textarea>
+                    <div class="form-text">
+                        Ghi chú nội bộ để theo dõi tình trạng đặt phòng, lý do thay đổi trạng thái, hoặc thông tin liên hệ với khách hàng.
+                    </div>
+                    @error('admin_notes')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
             
@@ -101,6 +137,9 @@
         </form>
     </div>
 </div>
+
+<!-- Ghi chú đặt phòng -->
+@include('admin.bookings.partials.notes')
 @endsection
 
 @section('scripts')

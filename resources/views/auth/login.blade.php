@@ -24,6 +24,10 @@
                 <form action="{{ route('login') }}" method="POST" class="bg-white p-5 contact-form w-100">
                     @csrf
                     
+                    @if(request()->has('redirect'))
+                        <input type="hidden" name="redirect" value="{{ request()->redirect }}">
+                    @endif
+                    
                     @if($errors->any())
                         <div class="alert alert-danger">
                             <ul class="mb-0">

@@ -14,12 +14,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Tạo các vai trò trước
+        //Tạo các vai trò trước
         $this->call([
             RoleSeeder::class,
         ]);
 
-        // Tạo tài khoản admin
+        //Tạo tài khoản admin
         User::create([
             'name' => 'Admin',
             'username' => 'admin',
@@ -59,10 +59,12 @@ class DatabaseSeeder extends Seeder
             'role_id' => 2, // customer role
         ]);
 
-        // User::factory(10)->create();
+        User::factory(10)->create();
 
         $this->call([
-            RoomSeeder::class,
+            NewRoomSeeder::class,
+            RoomTypeReviewSeeder::class,
+            ServiceSeeder::class,
         ]);
     }
 }

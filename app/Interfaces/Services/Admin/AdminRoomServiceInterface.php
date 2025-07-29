@@ -7,6 +7,39 @@ use Illuminate\Database\Eloquent\Collection;
 interface AdminRoomServiceInterface
 {
     public function getAllRooms($status = null);
+
+    public function getAllRoomsWithFilters($filters);
+    
+    /**
+     * Lấy danh sách phòng theo tầng
+     *
+     * @param int $floor
+     * @return Collection
+     */
+    public function getRoomsByFloor($floor);
+    
+    /**
+     * Lấy danh sách tầng có sẵn
+     *
+     * @return Collection
+     */
+    public function getAvailableFloors();
+    
+    /**
+     * Lấy tổng quan tất cả tầng
+     *
+     * @return array
+     */
+    public function getFloorOverview();
+    
+    /**
+     * Tạo nhiều phòng cùng lúc
+     *
+     * @param array $data
+     * @return int
+     */
+    public function bulkCreateRooms($data);
+
     public function getRoom($id);
     
     /**
@@ -14,6 +47,7 @@ interface AdminRoomServiceInterface
      *
      * @return Collection
      */
+
     public function getRoomTypes(): Collection;
     
     /**

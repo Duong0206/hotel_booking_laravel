@@ -33,9 +33,11 @@
                         <option value="all">Tất cả</option>
                         <option value="pending" {{ $status == 'pending' ? 'selected' : '' }}>Chờ xác nhận</option>
                         <option value="confirmed" {{ $status == 'confirmed' ? 'selected' : '' }}>Đã xác nhận</option>
+                        <option value="checked_in" {{ $status == 'checked_in' ? 'selected' : '' }}>Đã nhận phòng</option>
+                        <option value="checked_out" {{ $status == 'checked_out' ? 'selected' : '' }}>Đã trả phòng</option>
                         <option value="completed" {{ $status == 'completed' ? 'selected' : '' }}>Hoàn thành</option>
                         <option value="cancelled" {{ $status == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
-                        <option value="no-show" {{ $status == 'no-show' ? 'selected' : '' }}>Không đến</option>
+                        <option value="no_show" {{ $status == 'no_show' ? 'selected' : '' }}>Không đến</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -159,13 +161,19 @@
                                                 @case('confirmed')
                                                     <span class="badge bg-success">Đã xác nhận</span>
                                                     @break
+                                                @case('checked_in')
+                                                    <span class="badge bg-info">Đã nhận phòng</span>
+                                                    @break
+                                                @case('checked_out')
+                                                    <span class="badge bg-secondary">Đã trả phòng</span>
+                                                    @break
                                                 @case('cancelled')
                                                     <span class="badge bg-danger">Đã hủy</span>
                                                     @break
                                                 @case('completed')
                                                     <span class="badge bg-info">Hoàn thành</span>
                                                     @break
-                                                @case('no-show')
+                                                @case('no_show')
                                                     <span class="badge bg-secondary">Không đến</span>
                                                     @break
                                                 @default
@@ -202,10 +210,19 @@
                                 <i class="fas fa-circle text-success"></i> Đã xác nhận
                             </span>
                             <span class="mr-2">
+                                <i class="fas fa-circle text-info"></i> Đã nhận phòng
+                            </span>
+                            <span class="mr-2">
+                                <i class="fas fa-circle text-secondary"></i> Đã trả phòng
+                            </span>
+                            <span class="mr-2">
+                                <i class="fas fa-circle text-primary"></i> Hoàn thành
+                            </span>
+                            <span class="mr-2">
                                 <i class="fas fa-circle text-danger"></i> Đã hủy
                             </span>
                             <span class="mr-2">
-                                <i class="fas fa-circle text-info"></i> Hoàn thành
+                                <i class="fas fa-circle text-dark"></i> Không đến
                             </span>
                         </div>
                     </div>
@@ -224,9 +241,11 @@
     const statusData = {
         pending: {{ $statusStats['pending']['count'] ?? 0 }},
         confirmed: {{ $statusStats['confirmed']['count'] ?? 0 }},
-        cancelled: {{ $statusStats['cancelled']['count'] ?? 0 }},
+        checked_in: {{ $statusStats['checked_in']['count'] ?? 0 }},
+        checked_out: {{ $statusStats['checked_out']['count'] ?? 0 }},
         completed: {{ $statusStats['completed']['count'] ?? 0 }},
-        noShow: {{ $statusStats['no-show']['count'] ?? 0 }}
+        cancelled: {{ $statusStats['cancelled']['count'] ?? 0 }},
+        noShow: {{ $statusStats['no_show']['count'] ?? 0 }}
     };
     
     // Tạo biểu đồ tròn
@@ -234,11 +253,11 @@
     new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Chờ xác nhận', 'Đã xác nhận', 'Đã hủy', 'Hoàn thành', 'Không đến'],
+            labels: ['Chờ xác nhận', 'Đã xác nhận', 'Đã nhận phòng', 'Đã trả phòng', 'Hoàn thành', 'Đã hủy', 'Không đến'],
             datasets: [{
-                data: [statusData.pending, statusData.confirmed, statusData.cancelled, statusData.completed, statusData.noShow],
-                backgroundColor: ['#f6c23e', '#1cc88a', '#e74a3b', '#36b9cc', '#858796'],
-                hoverBackgroundColor: ['#daa520', '#169b6b', '#c0392b', '#2596be', '#6e707e'],
+                data: [statusData.pending, statusData.confirmed, statusData.checked_in, statusData.checked_out, statusData.completed, statusData.cancelled, statusData.noShow],
+                backgroundColor: ['#f6c23e', '#1cc88a', '#36b9cc', '#858796', '#28a745', '#e74a3b', '#6c757d'],
+                hoverBackgroundColor: ['#daa520', '#169b6b', '#2596be', '#6e707e', '#1e7e34', '#c0392b', '#545b62'],
                 hoverBorderColor: "rgba(234, 236, 244, 1)",
             }],
         },

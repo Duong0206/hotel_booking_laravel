@@ -29,4 +29,10 @@ interface ProfileServiceInterface
      * @return bool
      */
     public function changePassword(array $data): bool;
+
+    /**
+     * Lấy dữ liệu dashboard tổng quan cho user
+     * @return array
+     */
+    public function getDashboardData(): array;
 } 

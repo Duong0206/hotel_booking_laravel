@@ -18,10 +18,34 @@ class AdminRoomService implements AdminRoomServiceInterface
     {
         $this->roomRepository = $roomRepository;
     }
-
     public function getAllRooms($status = null)
     {
         return $this->roomRepository->getAll($status);
+    }
+
+    public function getAllRoomsWithFilters($filters)
+    {
+        return $this->roomRepository->getAllRoomsWithFilters($filters);
+    }
+
+    public function getRoomsByFloor($floor)
+    {
+        return $this->roomRepository->getRoomsByFloor($floor);
+    }
+    
+    public function getAvailableFloors()
+    {
+        return $this->roomRepository->getAvailableFloors();
+    }
+    
+    public function getFloorOverview()
+    {
+        return $this->roomRepository->getFloorOverview();
+    }
+    
+    public function bulkCreateRooms($data)
+    {
+        return $this->roomRepository->bulkCreateRooms($data);
     }
 
     public function getRoom($id)

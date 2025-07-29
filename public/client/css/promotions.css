@@ -1,0 +1,309 @@
+/* ===== PROMOTION STYLING ===== */
+
+/* Promotion Header ở đầu card */
+.promotion-header {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    padding: 10px 15px;
+    margin: -15px -15px 15px -15px;
+    border-radius: 8px 8px 0 0;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(231, 76, 60, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.promotion-header::before {
+    content: '🎉';
+    margin-right: 5px;
+}
+
+.promotion-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 3s infinite;
+}
+
+/* Room card cần có styling phù hợp */
+.room-with-promotion {
+    position: relative;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: white;
+    overflow: hidden;
+}
+
+.room-with-promotion .text {
+    position: relative;
+    z-index: 1;
+}
+
+.room-with-promotion:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Đảm bảo promotion header không bị ảnh hưởng bởi padding của .text */
+.room-with-promotion .promotion-header {
+    margin: 0 0 0 0;
+    border-radius: 8px 8px 0 0;
+}
+
+.room-with-promotion .text {
+    padding-top: 20px;
+}
+
+/* Promotion Badge trên Room Cards */
+.promotion-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+    animation: pulse 2s infinite;
+}
+
+/* Animation cho promotion badge */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Price comparison styling */
+.price-original {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 14px;
+}
+
+.price-discounted {
+    color: #e74c3c;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.savings-badge {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    margin: 5px 0;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
+}
+
+/* Promotion Section in Room Details */
+.promotions-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.promotions-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.promotion-card {
+    background: rgba(255,255,255,0.15);
+    padding: 15px;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.promotion-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.trust-indicators {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-bottom: 15px;
+}
+
+/* Button styling */
+.btn-promotion {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-promotion:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+    color: white;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .promotion-badge {
+        font-size: 10px;
+        padding: 3px 6px;
+        top: 10px;
+        right: 10px;
+    }
+    
+    .promotions-section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .promotion-card {
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .price-discounted {
+        font-size: 16px;
+    }
+    
+    .savings-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+}
+
+/* Mobile Sticky Promotion Bar */
+.mobile-promotion-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    padding: 12px 15px;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 -4px 20px rgba(231, 76, 60, 0.3);
+}
+
+@media (max-width: 768px) {
+    .mobile-promotion-bar {
+        display: flex;
+    }
+    
+    body {
+        padding-bottom: 70px; /* Space for sticky bar */
+    }
+}
+
+.mobile-promotion-bar .promo-info {
+    flex: 1;
+}
+
+.mobile-promotion-bar .promo-text {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.mobile-promotion-bar .promo-code {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.mobile-promotion-bar .book-now-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.mobile-promotion-bar .book-now-btn:hover {
+    background: rgba(255,255,255,0.3);
+    color: white;
+    text-decoration: none;
+}
+
+/* Promotion highlight effects */
+.promotion-highlight {
+    position: relative;
+    overflow: hidden;
+}
+
+.promotion-highlight::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Social proof styling */
+.social-proof {
+    background: rgba(255,255,255,0.1);
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    font-size: 12px;
+    border-left: 3px solid #2ecc71;
+}
+
+/* Urgency indicators */
+.urgency-indicator {
+    background: rgba(255,193,7,0.2);
+    color: #856404;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin: 5px 0;
+    border: 1px solid rgba(255,193,7,0.3);
+}
+
+/* Loading animation for promotion fetch */
+.promotion-loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+} 

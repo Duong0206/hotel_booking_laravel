@@ -23,16 +23,40 @@ class RoomRepository implements RoomRepositoryInterface
 
     public function findById(int $id): ?Room
     {
-        return $this->model->find($id);
+        return $this->model->with('roomType')->find($id);
     }
 
-    public function newQuery(): Builder 
+    public function newQuery(): Builder
     {
         return $this->model->newQuery();
     }
 
-    public function search(array $filters): Collection 
+    public function search(array $filters): Collection
     {
-        return $this->model->newQuery()->get(); 
+        return $this->model->newQuery()->get();
+    }
+    
+    public function findAvailableRoomByType(int $roomTypeId, string $checkInDateTime, string $checkOutDateTime): ?Room
+    {
+        return $this->model
+            ->where('room_type_id', $roomTypeId)
+            ->whereDoesntHave('bookings', function ($query) use ($checkInDateTime, $checkOutDateTime) {
+                $query->where(function ($q) use ($checkInDateTime, $checkOutDateTime) {
+                    $q->where('check_in_date', '<', $checkOutDateTime)
+                      ->where('check_out_date', '>', $checkInDateTime);
+                })->where('status', '!=', 'cancelled');
+            })
+            ->first();
+    }
+
+    public function getByRoomType(int $roomTypeId, int $limit = null): Collection
+    {
+        $query = $this->model->where('room_type_id', $roomTypeId)->with('roomType');
+        
+        if ($limit) {
+            $query->limit($limit);
+        }
+        
+        return $query->get();
     }
 }

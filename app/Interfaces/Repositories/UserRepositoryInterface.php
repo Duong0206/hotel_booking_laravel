@@ -71,6 +71,7 @@ interface UserRepositoryInterface
      * @param int $userId
      * @param string $token
      * @return bool
+     * 
      */
     public function updateResetToken(int $userId, string $token): bool;
 

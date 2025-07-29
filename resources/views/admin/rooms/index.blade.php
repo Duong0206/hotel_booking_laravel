@@ -1,134 +1,153 @@
 @extends('admin.layouts.admin-master')
 
-@section('header', 'Quản lý phòng')
-
 @section('content')
-<div class="container-fluid px-4">
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item active">Quản lý phòng</li>
-    </ol>
-    
-    <div class="card mb-4">
+<div class="container-fluid">
+    <!-- Bộ lọc (Không đổi) -->
+    <div class="card mb-3">
+        <div class="card-body d-flex flex-column justify-content-between" style="min-height: 140px;">
+            <form method="GET" action="{{ route('admin.rooms.index') }}">
+                <div class="row align-items-end">
+                    <div class="col-md-2">
+                        <label for="floor" class="form-label">Tầng</label>
+                        <select name="floor" id="floor" class="form-select">
+                            <option value="">Tất cả</option>
+                            @foreach($floors as $floor)
+                                <option value="{{ $floor }}" {{ ($filters['floor'] ?? '') == $floor ? 'selected' : '' }}>
+                                    Tầng {{ $floor }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="room_type" class="form-label">Loại phòng</label>
+                        <select name="room_type" id="room_type" class="form-select">
+                            <option value="">Tất cả</option>
+                            @foreach($roomTypes as $type)
+                                <option value="{{ $type->id }}" {{ ($filters['room_type'] ?? '') == $type->id ? 'selected' : '' }}>
+                                    {{ $type->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="search" class="form-label">Tìm kiếm</label>
+                        <input type="text" name="search" id="search" class="form-control" placeholder="Số phòng" value="{{ $filters['search'] ?? '' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="status" class="form-label">Trạng thái</label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="">Tất cả</option>
+                            <option value="available" {{ ($filters['status'] ?? '') == 'available' ? 'selected' : '' }}>Trống</option>
+                            <option value="booked" {{ ($filters['status'] ?? '') == 'booked' ? 'selected' : '' }}>Đã đặt</option>
+                            <option value="repair" {{ ($filters['status'] ?? '') == 'repair' ? 'selected' : '' }}>Bảo trì</option>
+                            
+                            
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="date" class="form-label">Ngày kiểm tra</label>
+                        <input type="date" name="date" id="date" class="form-control" value="{{ $filters['date'] ?? '' }}">
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Lọc</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sơ đồ phòng (Room Map/Grid) -->
+    <div class="card">
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <i class="fas fa-bed me-1"></i>
-                    Danh sách phòng
-                </div>
-                <div>
-                    <a href="{{ route('admin.rooms.create') }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus"></i> Thêm phòng mới
-                    </a>
-                </div>
+                <h5>Sơ đồ phòng ({{ $totalRooms }} phòng)</h5>
+                <a href="{{ route('admin.rooms.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Thêm phòng
+                </a>
             </div>
         </div>
         <div class="card-body">
-            <div class="mb-3">
-                <form action="{{ route('admin.rooms.index') }}" method="GET" class="row g-3">
-                    <div class="col-auto">
-                        <label for="status" class="col-form-label">Lọc theo trạng thái:</label>
-                    </div>
-                    <div class="col-auto">
-                        <select name="status" id="status" class="form-select" onchange="this.form.submit()">
-                            <option value="">Tất cả</option>
-                            <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Còn trống</option>
-                            <option value="booked" {{ request('status') == 'booked' ? 'selected' : '' }}>Đã đặt hoặc đang xử lý</option>
-                            <option value="repair" {{ request('status') == 'repair' ? 'selected' : '' }}>Bảo trì</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
+            @php
+                $statusClass = [
+                    'available' => 'border-success',
+                    'pending'   => 'border-warning',
+                    'booked'    => 'border-secondary',
+                    'repair'    => 'border-danger',
+                ];
+                $statusText = [
+                    'available' => 'Trống',
+                    'pending'   => 'Chờ xác nhận',
+                    'booked'    => 'Đã đặt',
+                    'repair'    => 'Bảo trì',
+                ];
+                $statusBgClass = [
+                    'available' => 'bg-success bg-opacity-50',   // xanh đậm
+                    'pending'   => 'bg-warning bg-opacity-50',   // vàng đậm
+                    'booked'    => 'bg-danger bg-opacity-50',    // đỏ đậm
+                    'repair'    => 'bg-secondary bg-opacity-50', // xám đậm
+                ];
+            @endphp
 
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Ảnh</th>
-                            <th>Số phòng</th>
-                            <th>Loại phòng</th>
-                            <th>Giá</th>
-                            <th>Sức chứa</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($rooms as $room)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>
-                                @if($room->primaryImage)
-                                    <img src="{{ $room->primaryImage->full_image_url }}" 
-                                         alt="Room Image" 
-                                         style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
-                                @elseif($room->firstImage)
-                                    <img src="{{ $room->firstImage->full_image_url }}" 
-                                         alt="Room Image" 
-                                         style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
-                                @else
-                                    <div style="width: 60px; height: 40px; background-color: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-image text-muted"></i>
+            @if($paginatedFloors->isEmpty())
+                <div class="text-center p-5">
+                    <i class="fas fa-search fa-3x text-muted"></i>
+                    <p class="mt-3">Không tìm thấy phòng nào phù hợp.</p>
+                </div>
+            @endif
+
+            @foreach($paginatedFloors as $floor => $floorRooms)
+                <h5 class="mt-4 border-bottom pb-2 mb-3">Tầng {{ $floor }}</h5>
+                <div class="row g-2">
+                    @foreach($floorRooms as $room)
+                        @php
+                            $status = !empty($filters['date']) ? $room->getStatusForDate($filters['date']) : $room->status_for_display;
+                        @endphp
+                        <div class="col-auto">
+                            <a href="{{ route('admin.rooms.show', $room->id) }}" style="text-decoration: none; color: inherit;">
+                                <div class="card m-1 p-0 shadow-sm {{ $statusClass[$status] ?? '' }} {{ $statusBgClass[$status] ?? '' }}"
+                                     style="width: 150px; min-height: 260px; border-width: 2px; display: flex; flex-direction: column;">
+                                    @if($room->primaryImage)
+                                        <img src="{{ Illuminate\Support\Facades\Storage::url($room->primaryImage->image_url) }}" class="card-img-top" alt="Ảnh phòng" style="height: 80px; object-fit: cover;">
+                                    @else
+                                        <div class="d-flex justify-content-center align-items-center bg-light" style="height: 80px;">
+                                            <i class="fas fa-image fa-2x text-muted"></i>
+                                        </div>
+                                    @endif
+                                    <div class="card-body p-2 text-center d-flex flex-column justify-content-between" style="flex: 1 1 auto; min-height: 120px;">
+                                        <div>
+                                            <div class="fw-bold text-truncate" style="font-size: 1.1em;" title="{{ $room->room_number }}">{{ $room->room_number }}</div>
+                                            <div class="small text-muted text-wrap" style="white-space: normal;" title="{{ $room->roomType->name }}">{{ $room->roomType->name }}</div>
+                                            <div class="mt-1">
+                                                <span class="fw-semibold small">
+                                                    {{ $statusText[$status] ?? 'Không rõ' }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="mt-auto">
+                                            <div class="d-flex justify-content-center align-items-center w-100">
+                                                <form action="{{ route('admin.rooms.destroy', $room->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xoá phòng này?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-md px-4 py-1 room-action-btn" style="font-size: 1em;">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
                                     </div>
-                                @endif
-                            </td>
-                            <td>{{ $room->room_number }}</td>
-                            <td>{{ $room->roomType->name ?? '' }}</td>
-                            <td>{{ number_format($room->price) }} VND</td>
-                            <td>{{ $room->capacity }}</td>
-                            <td>
-                                @php
-                                    $hasActiveBooking = $room->bookings()->whereIn('status', ['pending', 'confirmed'])->count() > 0;
-                                @endphp
-                                <span class="badge bg-{{ 
-                                    $hasActiveBooking ? 'warning' : 
-                                    ($room->status == 'available' ? 'success' : 
-                                    ($room->status == 'booked' ? 'primary' : 'warning')) 
-                                }}">
-                                    {{ 
-                                        $hasActiveBooking ? 'Đang xử lý đặt phòng' :
-                                        ($room->status == 'available' ? 'Còn trống' : 
-                                        ($room->status == 'booked' ? 'Đã đặt' : 'Bảo trì')) 
-                                    }}
-                                </span>
-                                
-                            </td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <a href="{{ route('admin.rooms.show', $room->id) }}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ route('admin.rooms.edit', $room->id) }}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ route('admin.rooms.destroy', $room->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa phòng này?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
                                 </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            @endforeach
 
-            <div class="d-flex justify-content-center mt-3">
-                {{ $rooms->appends(request()->query())->links() }}
+            <!-- Phân trang -->
+            <div class="d-flex justify-content-center mt-4">
+                {{ $paginatedFloors->appends(request()->query())->links() }}
             </div>
         </div>
     </div>
 </div>
-@endsection
-
-@section('scripts')
-<script>
-    $(document).ready(function() {
-        // Các mã JavaScript tùy chỉnh ở đây
-    });
-</script>
 @endsection

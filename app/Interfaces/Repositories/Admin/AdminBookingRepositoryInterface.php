@@ -96,4 +96,6 @@ interface AdminBookingRepositoryInterface
      * @return Collection
      */
     public function getBookingsForReport(array $filters = []): Collection;
+
+    public function findByBookingCode(string $code): ?\App\Models\Booking;
 } 

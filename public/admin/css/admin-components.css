@@ -1,0 +1,478 @@
+/* Admin Panel Components CSS */
+
+/* Notification Components */
+.notification-row {
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.notification-row:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-content .fw-bold {
+    font-size: 0.9rem;
+    max-width: 300px;
+    margin-bottom: 0.25rem;
+}
+
+.icon-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    flex-shrink: 0;
+}
+
+.notification-row:hover .icon-circle {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Stats Cards */
+.stats-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stats-card.active {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #a67c5b 100%);
+    color: white;
+}
+
+.stats-card.active .card-body {
+    color: white;
+}
+
+.stats-card .card-body {
+    padding: 1.5rem;
+}
+
+.stats-card .h5 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stats-card .text-xs {
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+
+/* Filter Section */
+.filter-section {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e9ecef;
+}
+
+.filter-section .form-select-sm {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Notification Detail Components */
+.notification-detail-header {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.notification-detail-header h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.notification-detail-content {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e9ecef;
+}
+
+.notification-detail-sidebar {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e9ecef;
+}
+
+.notification-detail-sidebar .card-header {
+    background: linear-gradient(135deg, var(--accent-color) 0%, rgba(193, 155, 118, 0.8) 100%);
+    color: white;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.notification-detail-sidebar .card-body {
+    padding: 1rem;
+}
+
+/* Quick Links Grid */
+.quick-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.quick-link-btn {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem 1.5rem;
+    text-decoration: none;
+    color: var(--secondary-color);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.quick-link-btn:hover {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #a67c5b 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+}
+
+/* Data Display Components */
+.data-display {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+}
+
+.data-display pre {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Data Items */
+.data-item {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.data-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateX(5px);
+}
+
+.data-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+.data-value {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--secondary-color);
+}
+
+.data-value .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.data-value code {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 0.25rem;
+    padding: 0.125rem 0.25rem;
+    font-size: 0.8rem;
+    color: #e83e8c;
+}
+
+/* Details/Summary Components */
+details {
+    margin-bottom: 1rem;
+}
+
+summary {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+summary:hover {
+    background: #e9ecef;
+}
+
+summary::-webkit-details-marker {
+    display: none;
+}
+
+summary::before {
+    content: '▶';
+    margin-right: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+details[open] summary::before {
+    transform: rotate(90deg);
+}
+
+/* Status Badges */
+.badge.bg-pending {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
+    color: #000;
+}
+
+.badge.bg-confirmed {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.badge.bg-cancelled {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+}
+
+.badge.bg-completed {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+}
+
+.badge.bg-no_show {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+}
+
+/* Review Components */
+.admin-reviews-section .review-item {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.admin-reviews-section .review-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.admin-reviews-section .review-item .stars {
+    display: inline-flex;
+    align-items: center;
+}
+
+.admin-reviews-section .review-item .stars .icon-star {
+    color: #ffc107;
+    font-size: 1.1rem;
+    margin-right: 2px;
+}
+
+.admin-reviews-section .review-item .stars .icon-star-o {
+    color: #dee2e6;
+    font-size: 1.1rem;
+    margin-right: 2px;
+}
+
+.admin-reviews-section .review-item .stars .icon-star-half {
+    color: #ffc107;
+    font-size: 1.1rem;
+    margin-right: 2px;
+}
+
+.admin-reviews-section .review-content {
+    margin-top: 0.5rem;
+}
+
+.admin-reviews-section .review-content p {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.admin-reviews-section .review-content p:last-child {
+    margin-bottom: 0;
+}
+
+.admin-reviews-section .rating-summary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.admin-reviews-section .rating-summary h2 {
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.admin-reviews-section .rating-summary .stars {
+    margin-bottom: 1rem;
+}
+
+.admin-reviews-section .rating-summary .stars .icon-star,
+.admin-reviews-section .rating-summary .stars .icon-star-half {
+    color: #ffd700;
+    font-size: 1.5rem;
+    margin-right: 3px;
+}
+
+.admin-reviews-section .rating-summary .stars .icon-star-o {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.5rem;
+    margin-right: 3px;
+}
+
+.admin-reviews-section .no-reviews {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    border: 2px dashed #dee2e6;
+}
+
+.admin-reviews-section .no-reviews .icon-star-o {
+    color: #dee2e6;
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.admin-reviews-section .review-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.admin-reviews-section .review-actions .btn {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Animation Classes */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notification-row {
+    animation: slideInUp 0.5s ease forwards;
+}
+
+.notification-row:nth-child(1) { animation-delay: 0.1s; }
+.notification-row:nth-child(2) { animation-delay: 0.2s; }
+.notification-row:nth-child(3) { animation-delay: 0.3s; }
+.notification-row:nth-child(4) { animation-delay: 0.4s; }
+.notification-row:nth-child(5) { animation-delay: 0.5s; }
+
+/* Loading Skeleton */
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 0.25rem;
+    height: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h5 {
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.empty-state p {
+    margin-bottom: 0;
+    opacity: 0.7;
+} 
+
+.page-header.fade-in {
+    /* background: #f8f9fa; */
+    border-radius: 8px;
+    padding: 12px 24px 8px 24px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    animation: fadeInDown 0.5s;
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+} 

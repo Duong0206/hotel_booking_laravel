@@ -36,4 +36,44 @@ class RoomType extends Model
     {
         return $this->belongsToMany(Promotion::class, 'promotion_room_type');
     }
+
+    /**
+     * Get the reviews for the room type.
+     */
+    public function reviews()
+    {
+        return $this->hasMany(RoomTypeReview::class);
+    }
+
+    /**
+     * Get the approved reviews for the room type.
+     */
+    public function approvedReviews()
+    {
+        return $this->hasMany(RoomTypeReview::class)->where('status', 'approved');
+    }
+
+    /**
+     * Get the average rating for the room type.
+     */
+    public function getAverageRatingAttribute()
+    {
+        return $this->approvedReviews()->avg('rating') ?? 0;
+    }
+
+    /**
+     * Get the reviews count for the room type.
+     */
+    public function getReviewsCountAttribute()
+    {
+        return $this->approvedReviews()->count();
+    }
+
+    /**
+     * Get the services for the room type.
+     */
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'room_type_services');
+    }
 } 

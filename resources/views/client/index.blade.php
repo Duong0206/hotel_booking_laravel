@@ -171,7 +171,7 @@
                 <h3 class="heading mb-3">25/7 Front Desk</h3>
                 <p>A small river named Duden flows by their place and supplies.</p>
               </div>
-            </div>      
+            </div>
           </div>
           <div class="col-md-3 d-flex align-self-stretch ftco-animate">
             <div class="media block-6 services py-4 d-block text-center">
@@ -184,7 +184,7 @@
                 <h3 class="heading mb-3">Restaurant Bar</h3>
                 <p>A small river named Duden flows by their place and supplies.</p>
               </div>
-            </div>    
+            </div>
           </div>
           <div class="col-md-3 d-flex align-sel Searchf-stretch ftco-animate">
             <div class="media block-6 services py-4 d-block text-center">
@@ -197,7 +197,7 @@
                 <h3 class="heading mb-3">Transfer Services</h3>
                 <p>A small river named Duden flows by their place and supplies.</p>
               </div>
-            </div>      
+            </div>
           </div>
           <div class="col-md-3 d-flex align-self-stretch ftco-animate">
             <div class="media block-6 services py-4 d-block text-center">
@@ -210,7 +210,7 @@
                 <h3 class="heading mb-3">Spa Suites</h3>
                 <p>A small river named Duden flows by their place and supplies.</p>
               </div>
-            </div>      
+            </div>
           </div>
         </div>
       </div>
@@ -222,34 +222,45 @@
                 <div class="col-md-7 heading-section text-center ftco-animate">
                     <h2 class="mb-4">Phòng Nổi Bật</h2>
                 </div>
-            </div>    
+            </div>
             <div class="row">
-                @foreach($rooms as $room)
-                <div class="col-sm col-md-6 col-lg-4 ftco-animate">
-                    <div class="room">
-                        <a href="{{ route('rooms-single', $room->id) }}" class="img d-flex justify-content-center align-items-center" style="background-image: url(client/images/room-{{ $loop->iteration % 6 + 1 }}.jpg);">
-                            <div class="icon d-flex justify-content-center align-items-center">
-                                <span class="icon-search2"></span>
+                @foreach ($roomTypes as $type)
+                    <div class="col-sm col-md-6 col-lg-4 ftco-animate">
+                        <div class="room">
+                            <a href="{{ route('rooms-single', $type->id) }}"
+                                class="img d-flex justify-content-center align-items-center"
+                                style="background-image: url(client/images/room-{{ ($loop->iteration % 6) + 1 }}.jpg);">
+                                <div class="icon d-flex justify-content-center align-items-center">
+                                    <span class="icon-search2"></span>
+                                </div>
+                            </a>
+                            <div class="text p-3 text-center">
+                                <h3 class="mb-3">
+                                    <a href="{{ route('rooms-single', $type->id) }}">
+                                        {{ $type->name }}
+                                    </a>
+                                </h3>
+                                <p>
+                                    <span class="price mr-2">{{ number_format($type->price) }}đ</span>
+                                    <span class="per">mỗi đêm</span>
+                                </p>
+                                <ul class="list">
+                                    <li><span>Sức chứa:</span> {{ $type->capacity }} Người</li>
+                                </ul>
+                                <hr>
+                                <p class="pt-1">
+                                    <a href="{{ route('rooms-single', $type->id) }}" class="btn-custom">
+                                        Chi tiết <span class="icon-long-arrow-right"></span>
+                                    </a>
+                                    @if ($type->status == 'available')
+                                        <a href="{{ route('booking') }}" class="btn-custom ml-2">
+                                            Đặt ngay <span class="icon-long-arrow-right"></span>
+                                        </a>
+                                    @endif
+                                </p>
                             </div>
-                        </a>
-                        <div class="text p-3 text-center">
-                            <h3 class="mb-3"><a href="{{ route('rooms-single', $room->id) }}">{{ $room->roomType->name }}</a></h3>
-                            <p><span class="price mr-2">{{ number_format($room->price) }}đ</span> <span class="per">mỗi đêm</span></p>
-                            <ul class="list">
-                                <li><span>Sức chứa:</span> {{ $room->capacity }} Người</li>
-                                <li><span>Phòng số:</span> {{ $room->room_number }}</li>
-                                <li><span>Trạng thái:</span> {{ $room->status == 'available' ? 'Còn trống' : 'Đã đặt' }}</li>
-                            </ul>
-                            <hr>
-                            <p class="pt-1">
-                                <a href="{{ route('rooms-single', $room->id) }}" class="btn-custom">Chi tiết <span class="icon-long-arrow-right"></span></a>
-                                @if($room->status == 'available')
-                                <a href="{{ route('booking') }}" class="btn-custom ml-2">Đặt ngay <span class="icon-long-arrow-right"></span></a>
-                                @endif
-                            </p>
                         </div>
                     </div>
-                </div>
                 @endforeach
             </div>
         </div>
@@ -378,6 +389,52 @@
     	</div>
     </section>
 
+    <!-- Section Giới thiệu khách sạn -->
+    <section class="ftco-section bg-light">
+      <div class="container">
+        <div class="row justify-content-center mb-5 pb-3">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+            <span class="subheading">Về Chúng Tôi</span>
+            <h2 class="mb-4">Chào mừng đến với Deluxe Hotel</h2>
+            <p>Deluxe Hotel là điểm đến lý tưởng cho kỳ nghỉ dưỡng và công tác của bạn. Chúng tôi cung cấp hệ thống phòng nghỉ hiện đại, dịch vụ chuyên nghiệp và không gian sang trọng, mang đến trải nghiệm tuyệt vời cho mọi khách hàng.</p>
+            <a href="{{ route('about') }}" class="btn btn-primary mt-3">Xem thêm</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Liên hệ khách sạn -->
+    <section class="ftco-section contact-section">
+      <div class="container">
+        <div class="row justify-content-center mb-5 pb-3">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+            <span class="subheading">Liên hệ</span>
+            <h2 class="mb-4">Thông tin liên hệ</h2>
+            <p>Liên hệ với chúng tôi để được hỗ trợ nhanh nhất!</p>
+          </div>
+        </div>
+        <div class="row d-flex contact-info">
+          <div class="col-md-4 d-flex ftco-animate">
+            <div class="info bg-white p-4 w-100 text-center">
+              <div class="icon mb-2"><span class="icon-map-marker"></span></div>
+              <p><span>Địa chỉ:</span> 198 West 21th Street, Suite 721 New York NY 10016</p>
+            </div>
+          </div>
+          <div class="col-md-4 d-flex ftco-animate">
+            <div class="info bg-white p-4 w-100 text-center">
+              <div class="icon mb-2"><span class="icon-phone"></span></div>
+              <p><span>Điện thoại:</span> <a href="tel://1234567920">+ 1235 2355 98</a></p>
+            </div>
+          </div>
+          <div class="col-md-4 d-flex ftco-animate">
+            <div class="info bg-white p-4 w-100 text-center">
+              <div class="icon mb-2"><span class="icon-envelope"></span></div>
+              <p><span>Email:</span> <a href="mailto:info@yoursite.com">info@yoursite.com</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section class="ftco-section testimony-section bg-light">
       <div class="container">
@@ -533,52 +590,83 @@
       </div>
     </section>
 
-    <section class="instagram">
-      <div class="container-fluid">
-        <div class="row no-gutters justify-content-center pb-5">
-          <div class="col-md-7 text-center heading-section ftco-animate">
-            <h2><span>Instagram</span></h2>
-          </div>
-        </div>
-        <div class="row no-gutters">
-          <div class="col-sm-12 col-md ftco-animate">
-            <a href="client/images/insta-1.jpg" class="insta-img image-popup" style="background-image: url(client/images/insta-1.jpg);">
-              <div class="icon d-flex justify-content-center">
-                <span class="icon-instagram align-self-center"></span>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-12 col-md ftco-animate">
-            <a href="client/images/insta-2.jpg" class="insta-img image-popup" style="background-image: url(client/images/insta-2.jpg);">
-              <div class="icon d-flex justify-content-center">
-                <span class="icon-instagram align-self-center"></span>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-12 col-md ftco-animate">
-            <a href="client/images/insta-3.jpg" class="insta-img image-popup" style="background-image: url(client/images/insta-3.jpg);">
-              <div class="icon d-flex justify-content-center">
-                <span class="icon-instagram align-self-center"></span>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-12 col-md ftco-animate">
-            <a href="client/images/insta-4.jpg" class="insta-img image-popup" style="background-image: url(client/images/insta-4.jpg);">
-              <div class="icon d-flex justify-content-center">
-                <span class="icon-instagram align-self-center"></span>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-12 col-md ftco-animate">
-            <a href="client/images/insta-5.jpg" class="insta-img image-popup" style="background-image: url(client/images/insta-5.jpg);">
-              <div class="icon d-flex justify-content-center">
-                <span class="icon-instagram align-self-center"></span>
-              </div>
-            </a>
-          </div>
-        </div>
+    @auth
+    <!-- Chat Support Button and Chat Box (Bottom Right) -->
+    <button id="openChatModal" style="position: fixed; bottom: 30px; right: 30px; z-index: 1050; background: #007bff; color: #fff; border: none; border-radius: 50%; width: 60px; height: 60px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-size: 28px; display: flex; align-items: center; justify-content: center;">
+        <span class="icon-chat"></span>
+    </button>
+    <div id="chatBox" style="display: none; position: fixed; bottom: 100px; right: 30px; width: 340px; max-width: 95vw; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.18); z-index: 1060; flex-direction: column; overflow: hidden;">
+      <div style="background: #007bff; color: #fff; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-weight: 600;">Hỗ trợ trực tuyến</span>
+        <button id="closeChatBox" style="background: transparent; border: none; color: #fff; font-size: 22px; line-height: 1; cursor: pointer;">&times;</button>
       </div>
-    </section>
+      <div id="chatMessages" style="padding: 16px; background: #f8f9fa; height: 260px; overflow-y: auto;">
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          @php
+            $ticket = Auth::user()->supportTickets()->with(['messages' => function($q){ $q->orderBy('created_at'); }])->latest()->first();
+          @endphp
+          @if($ticket && $ticket->messages->count())
+            @foreach($ticket->messages as $msg)
+              <li style="margin-bottom: 10px; text-align: {{ $msg->sender_type == 'user' ? 'right' : 'left' }};">
+                <div style="font-size: 12px; color: #888; margin-bottom: 2px;">
+                  @if($msg->sender_type == 'user')
+                    {{ $ticket->user && $msg->sender_id == $ticket->user->id ? $ticket->user->name : 'Bạn' }}
+                  @else
+                    Admin
+                  @endif
+                </div>
+                <span style="display: inline-block; background: {{ $msg->sender_type == 'user' ? '#007bff' : '#e9ecef' }}; color: {{ $msg->sender_type == 'user' ? '#fff' : '#222' }}; padding: 8px 14px; border-radius: 16px;">{{ $msg->message }}</span>
+              </li>
+            @endforeach
+          @else
+            <li style="text-align:center; color:#888;">Chưa có cuộc trò chuyện nào. Hãy gửi tin nhắn đầu tiên để tạo yêu cầu hỗ trợ!</li>
+          @endif
+        </ul>
+      </div>
+      <form id="chatForm" style="display: flex; gap: 8px; padding: 12px 16px; background: #fff; border-top: 1px solid #eee;">
+        <input type="text" id="chatInput" name="message" class="form-control" placeholder="Nhập tin nhắn..." style="flex: 1;">
+        <button type="submit" id="sendChatBtn" class="btn btn-primary">Gửi</button>
+      </form>
+      <input type="hidden" id="ticketId" value="{{ $ticket ? $ticket->id : '' }}">
+    </div>
+    <script>
+      const openBtn = document.getElementById('openChatModal');
+      const chatBox = document.getElementById('chatBox');
+      const closeBtn = document.getElementById('closeChatBox');
+      const chatInput = document.getElementById('chatInput');
+      const chatForm = document.getElementById('chatForm');
+      const chatMessages = document.querySelector('#chatMessages ul');
+      const ticketIdInput = document.getElementById('ticketId');
+      openBtn.onclick = function() {
+        chatBox.style.display = 'flex';
+        setTimeout(() => { chatInput.focus(); }, 200);
+      };
+      closeBtn.onclick = function() { chatBox.style.display = 'none'; };
+      chatForm.onsubmit = function(e) {
+        e.preventDefault();
+        const msg = chatInput.value.trim();
+        if (!msg) return;
+        const ticketId = ticketIdInput.value;
+        let url = '';
+        let data = { message: msg, _token: '{{ csrf_token() }}' };
+        if(ticketId) {
+          url = '/support/ticket/' + ticketId + '/message';
+        } else {
+          url = '/support/ticket';
+          data.subject = 'Chat hỗ trợ nhanh';
+        }
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+          body: JSON.stringify(data)
+        })
+        .then(res => res.redirected ? window.location.href = res.url : res.json())
+        .then(res => { window.location.reload(); })
+        .catch(() => { alert('Có lỗi khi gửi tin nhắn!'); });
+      };
+      chatInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') chatForm.dispatchEvent(new Event('submit')); });
+    </script>
+    @endauth
 
 <style>
 .promotion-card .card {

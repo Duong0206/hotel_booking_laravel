@@ -23,6 +23,7 @@
                             {{ Auth::user()->name }}
                         </a>
                         <div class="dropdown-menu" aria-labelledby="userDropdown">
+                            <a class="dropdown-item" href="{{ route('user.profile') }}">Quản lý tài khoản</a>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="dropdown-item">Đăng xuất</button>

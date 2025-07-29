@@ -18,6 +18,16 @@ class RoomService implements RoomServiceInterface
         $this->roomRepository = $roomRepository;
     }
 
+    public function getAll(): Collection
+    {
+        return $this->roomRepository->getAll();
+    }
+
+    public function findById(int $id)
+    {
+        return $this->roomRepository->findById($id);
+    }
+
     public function validateFilters(array $filters)
     {
         $validator = Validator::make($filters, [

@@ -1,0 +1,1 @@
+<x-booking-notes :booking="$booking" :showAddButton="true" :showSearch="true" /> 

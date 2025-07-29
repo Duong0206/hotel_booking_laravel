@@ -37,4 +37,16 @@ interface RoomRepositoryInterface
      * @return Collection
      */
     public function search(array $filters);
+
+    public function findAvailableRoomByType(int $roomTypeId, string $checkIn, string $checkOut): ?Room;
+
+    /**
+     * Lấy phòng theo loại phòng
+     *
+     * @param int $roomTypeId
+     * @param int|null $limit
+     * @return Collection
+     */
+    public function getByRoomType(int $roomTypeId, int $limit = null): Collection;
+
 }

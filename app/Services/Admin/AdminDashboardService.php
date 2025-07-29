@@ -75,9 +75,11 @@ class AdminDashboardService implements AdminDashboardServiceInterface
         $statusCounts = [
             'pending' => $this->adminBookingRepository->countByStatus('pending'),
             'confirmed' => $this->adminBookingRepository->countByStatus('confirmed'),
-            'cancelled' => $this->adminBookingRepository->countByStatus('cancelled'),
+            'checked_in' => $this->adminBookingRepository->countByStatus('checked_in'),
+            'checked_out' => $this->adminBookingRepository->countByStatus('checked_out'),
             'completed' => $this->adminBookingRepository->countByStatus('completed'),
-            'no-show' => $this->adminBookingRepository->countByStatus('no-show'),
+            'cancelled' => $this->adminBookingRepository->countByStatus('cancelled'),
+            'no_show' => $this->adminBookingRepository->countByStatus('no_show'),
         ];
         
         return [
