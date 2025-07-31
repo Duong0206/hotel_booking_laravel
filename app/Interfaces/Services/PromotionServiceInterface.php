@@ -83,4 +83,23 @@ interface PromotionServiceInterface
      * @return bool
      */
     public function markAsUsed(int $promotionId): bool;
+
+    /**
+     * Kiểm tra và áp dụng mã giảm giá cho booking
+     *
+     * @param string $code
+     * @param int $bookingId
+     * @return array
+     * @throws \Exception
+     */
+    public function checkAndApplyPromotion(string $code, int $bookingId): array;
+
+    /**
+     * Lấy danh sách khuyến mãi có thể áp dụng cho loại phòng
+     *
+     * @param int $roomTypeId
+     * @param float $price
+     * @return Collection
+     */
+    public function getAvailablePromotionsForRoomType(int $roomTypeId, float $price): Collection;
 } 

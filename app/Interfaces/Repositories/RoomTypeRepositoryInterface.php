@@ -2,28 +2,27 @@
 
 namespace App\Interfaces\Repositories;
 
+use App\Models\RoomType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
 
 interface RoomTypeRepositoryInterface
 {
-    /**
-     * 
-     *
-     * @return Builder
-     */
     public function newQuery(): Builder;
-    /**
-     * Lấy tất cả loại phòng
-     *
-     * @return Collection
-     */
+
     public function getAllRoomTypes(): Collection;
 
-    /**
-     * Lấy tất cả loại phòng với relationship services
-     *
-     * @return Collection
-     */
     public function getAllRoomTypesWithServices(): Collection;
+
+    public function findById(int $id): ?RoomType;
+
+    /**
+     * Tìm kiếm loại phòng theo các tiêu chí
+     */
+    public function searchRoomTypes(array $filters): Collection;
+
+    /**
+     * Lấy tất cả loại phòng với khuyến mại đang áp dụng
+     */
+    public function getAllRoomTypesWithPromotions(): Collection;
 }

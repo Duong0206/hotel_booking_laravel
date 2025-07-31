@@ -76,7 +76,11 @@
                             <p class="mb-2">Giá phòng ({{ $booking->room->roomType->name }})</p>
                             <p class="mb-2">Số đêm</p>
                             <p class="mb-2">Thuế & phí dịch vụ</p>
-                            <hr>
+                            <p class="mb-2">Khuyến mãi</p>
+                            <div id="promotion_description" class="form-text text-muted mb-2 small"></div>
+                            
+                            <p class="mb-2" id="discount_amount">Giảm giá</p>
+                            <hr class="my-3">
                             <p class="fw-bold mb-0">Tổng cộng</p>
                         </div>
                         <div class="col-md-4 text-end">
@@ -84,12 +88,33 @@
                             <p class="mb-2">{{ \Carbon\Carbon::parse($booking->check_in_date)->diffInDays(\Carbon\Carbon::parse($booking->check_out_date)) }}
                                     đêm</p>
                             <p class="mb-2">Miễn phí</p>
+                            <p class="mb-2">
+                                <select class="form-select form-select-sm" id="promotion_select" name="promotion_id">
+                                    <option value="">Không áp dụng khuyến mãi</option>
+                                    @foreach($promotions as $promotion)
+                                        <option value="{{ $promotion->id }}" 
+                                            data-discount-type="{{ $promotion->discount_type }}"
+                                            data-discount-value="{{ $promotion->discount_value }}"
+                                            data-description="{{ $promotion->description }}">
+                                            {{ $promotion->name }} - 
+                                            @if($promotion->discount_type == 'percentage')
+                                                Giảm {{ $promotion->discount_value }}%
+                                            @else
+                                                Giảm {{ number_format($promotion->discount_value, 0, ',', '.') }} VNĐ
+                                            @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </p>
+                            <p class="mb-2 text-danger" id="discount_amount_value">0 VNĐ</p>
                             <hr>
-                            <p class="fw-bold text-gold mb-0">{{ number_format($booking->price, 0, ',', '.') }} VNĐ</p>
+                            <p class="fw-bold text-gold mb-0" id="total_price">{{ number_format($booking->price, 0, ',', '.') }} VNĐ</p>
+                            <input type="hidden" id="original_price" value="{{ $booking->price }}">
                         </div>
                     </div>
                 </div>
-                <form action="{{ route('payment-method', $booking->id) }}" method="GET">
+                <form action="{{ route('payment-method', $booking->id) }}" method="GET" id="payment-form">
+                    <input type="hidden" name="promotion_id" id="selected_promotion_id" value="">
                     <div class="text-center mt-4">
                         <button type="submit" class="btn btn-primary btn-lg px-5">
                             <i class="fas fa-check-circle mr-2"></i> Tiếp tục thanh toán
@@ -138,4 +163,60 @@
             transform: scale(1.1);
         }
     </style>
+
+    @push('scripts')
+    <script>
+        document.getElementById('promotion_select').addEventListener('change', function() {
+            const promotionId = this.value;
+            const description = this.options[this.selectedIndex].dataset.description;
+            
+            // Cập nhật promotion_id trong form
+            document.getElementById('selected_promotion_id').value = promotionId;
+            
+            // Hiển thị mô tả khuyến mãi
+            document.getElementById('promotion_description').textContent = description || '';
+            
+            if (promotionId) {
+                // Gọi API tính toán giá
+                fetch('{{ route("calculate-promotion") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        promotion_id: promotionId,
+                        booking_id: '{{ $booking->id }}'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Hiển thị số tiền giảm
+                        document.getElementById('discount_amount_value').textContent = data.data.formatted.discount_amount;
+                        
+                        // Cập nhật tổng tiền
+                        document.getElementById('total_price').textContent = data.data.formatted.final_price;
+                        
+                        // Hiển thị phần giảm giá
+                        document.getElementById('discount_amount').style.display = 'block';
+                        document.getElementById('discount_amount_value').style.display = 'block';
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra khi tính giá khuyến mãi');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi tính giá khuyến mãi');
+                });
+            } else {
+                // Reset về giá gốc
+                document.getElementById('discount_amount_value').textContent = '0 VNĐ';
+                document.getElementById('total_price').textContent = '{{ number_format($booking->price, 0, ',', '.') }} VNĐ';
+                document.getElementById('discount_amount').style.display = 'none';
+                document.getElementById('discount_amount_value').style.display = 'none';
+            }
+        });
+    </script>
+    @endpush
 @endsection

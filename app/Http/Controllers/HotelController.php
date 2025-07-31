@@ -44,8 +44,8 @@ class HotelController extends Controller
 
     public function index()
     {
-        // Lấy tất cả loại phòng để hiển thị ở trang chủ
-        $roomTypes = $this->roomTypeService->getAllRoomTypes()->take(6); // Lấy 6 loại phòng đầu tiên
+        // Lấy tất cả loại phòng với khuyến mại để hiển thị ở trang chủ
+        $roomTypes = $this->roomTypeService->getAllRoomTypesWithPromotions()->take(6); // Lấy 6 loại phòng đầu tiên
         
         // Lấy khuyến mại nổi bật
         $featuredPromotions = $this->promotionService->getFeaturedPromotions(3);
@@ -57,7 +57,7 @@ class HotelController extends Controller
     {
         // Lấy tất cả phòng để hiển thị ở trang danh sách phòng
         $rooms = $this->roomRepository->getAll();
-        $roomTypes = $this->roomTypeService->getAllRoomTypes();
+        $roomTypes = $this->roomTypeService->getAllRoomTypesWithPromotions();
         return view('client.rooms.index', compact('rooms', 'roomTypes'));
     }
 
@@ -88,8 +88,8 @@ class HotelController extends Controller
             return redirect()->route('rooms');
         }
 
-        // Lấy thông tin chi tiết loại phòng
-        $roomType = $this->roomTypeService->findById($id);
+        // Lấy thông tin chi tiết loại phòng với khuyến mại
+        $roomType = $this->roomTypeService->getAllRoomTypesWithPromotions()->where('id', $id)->first();
 
         if (!$roomType) {
             return redirect()->route('rooms')->with('error', 'Không tìm thấy loại phòng');

@@ -2,12 +2,15 @@
 
 @section('title', 'Quản Lý Khuyến Mại')
 
-@section('header', '')
+@section('header', 'Quản lý khuyến mại')
 
 @section('content')
-<div class="page-header">
-    <h1><i class="fas fa-percentage me-2"></i>Quản Lý Khuyến Mại</h1>
-</div>
+<div class="container-fluid px-4">
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Quản lý khuyến mại</li>
+    </ol>
+
 
 {{-- Stats Cards --}}
 <div class="row mb-4">
@@ -87,8 +90,6 @@
             </div>
         </form>
 
-
-
         {{-- Table --}}
         <div class="table-responsive">
             <table class="table table-hover">
@@ -109,14 +110,7 @@
                         <tr>
                             <td>
                                 @if($promotion->image)
-                                    {{-- Debug info (xóa sau khi fix) --}}
-                                    @if(request()->has('debug'))
-                                        <small class="text-muted d-block">Image: {{ $promotion->image }}</small>
-                                        <small class="text-muted d-block">URL: {{ asset('storage/' . $promotion->image) }}</small>
-                                        <small class="text-muted d-block">File exists: {{ file_exists(storage_path('app/public/' . $promotion->image)) ? 'YES' : 'NO' }}</small>
-                                    @endif
-                                    <img src="{{ asset('storage/' . $promotion->image) }}" alt="{{ $promotion->title }}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;" 
-                                         onerror="console.error('Image failed to load:', this.src); this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;bg-danger text-white d-flex align-items-center justify-content-center&quot; style=&quot;width: 60px; height: 60px;&quot;><i class=&quot;fas fa-exclamation-triangle&quot;></i></div>';">
+                                    <img src="{{ asset('storage/' . $promotion->image) }}" alt="{{ $promotion->title }}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
                                 @else
                                     <div class="bg-primary text-white d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
                                         <i class="fas fa-percentage"></i>
@@ -155,11 +149,7 @@
                                 </small>
                             </td>
                             <td>
-                                @if($promotion->rooms->count() > 0)
-                                    <span class="badge bg-success text-white">
-                                        <i class="fas fa-bed"></i> {{ $promotion->rooms->count() }} phòng cụ thể
-                                    </span>
-                                @elseif($promotion->roomTypes->count() > 0)
+                                @if($promotion->roomTypes && $promotion->roomTypes->count() > 0)
                                     <small class="text-dark">
                                         <strong>{{ $promotion->roomTypes->count() }} loại phòng</strong>
                                         @if($promotion->roomTypes->count() == 1)
@@ -196,19 +186,15 @@
                                 @endphp
                                 
                                 <div class="d-flex flex-column gap-1">
-                                    {{-- Tạm dừng --}}
                                     <span class="badge badge-sm {{ $currentStatus === 'inactive' ? 'bg-secondary text-white' : 'bg-light text-dark' }}">
                                         Tạm dừng
                                     </span>
-                                    {{-- Sắp diễn ra --}}
                                     <span class="badge badge-sm {{ $currentStatus === 'upcoming' ? 'bg-warning text-dark' : 'bg-light text-dark' }}">
                                         Sắp diễn ra
                                     </span>
-                                    {{-- Đang hoạt động --}}
                                     <span class="badge badge-sm {{ $currentStatus === 'active' ? 'bg-success text-white' : 'bg-light text-dark' }}">
                                         Đang hoạt động  
                                     </span>
-                                    {{-- Kết thúc --}}
                                     <span class="badge badge-sm {{ $currentStatus === 'expired' ? 'bg-danger text-white' : 'bg-light text-dark' }}">
                                         Kết thúc
                                     </span>
@@ -229,7 +215,7 @@
                                     $isExpired = $promotion->expired_at < now();
                                     $isActive = $promotion->is_active;
                                     $isUpcoming = $promotion->valid_from && $promotion->valid_from > now();
-                                    $canDelete = !$isExpired && (!$isActive || $isUpcoming); // Chỉ được xóa khi "Tạm dừng" hoặc "Sắp diễn ra"
+                                    $canDelete = !$isExpired && (!$isActive || $isUpcoming);
                                 @endphp
                                 
                                 <div class="btn-group" role="group">
@@ -281,10 +267,6 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-
-
-
-
     // Show alert notification
     function showAlert(type, message) {
         const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
@@ -305,7 +287,6 @@ $(document).ready(function() {
             alert.alert('close');
         }, 4000);
     }
-
 });
 </script>
 @endpush

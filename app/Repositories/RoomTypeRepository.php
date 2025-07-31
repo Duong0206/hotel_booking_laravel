@@ -50,10 +50,59 @@ class RoomTypeRepository implements RoomTypeRepositoryInterface
      * Tìm loại phòng theo ID
      *
      * @param int $id
-     * @return mixed
+     * @return RoomType|null
      */
-    public function findById(int $id)
+    public function findById(int $id): ?RoomType
     {
         return $this->model->find($id);
+    }
+
+    /**
+     * Tìm kiếm loại phòng theo các tiêu chí
+     *
+     * @param array $filters
+     * @return Collection
+     */
+    public function searchRoomTypes(array $filters): Collection
+    {
+        $query = $this->newQuery();
+
+        // Gộp tìm theo keyword hoặc loại phòng
+        if (!empty($filters['keyword']) || !empty($filters['type'])) {
+            $query->where(function ($q) use ($filters) {
+                if (!empty($filters['keyword'])) {
+                    $q->orWhere('name', 'like', '%' . $filters['keyword'] . '%');
+                }
+
+                if (!empty($filters['type'])) {
+                    $q->orWhere('id', $filters['type']);
+                }
+            });
+        }
+
+        // Lọc theo khoảng giá (giữ nguyên là AND với các điều kiện trên)
+        if (!empty($filters['price_min'])) {
+            $query->where('price', '>=', (int)$filters['price_min']);
+        }
+
+        if (!empty($filters['price_max'])) {
+            $query->where('price', '<=', (int)$filters['price_max']);
+        }
+
+        return $query->orderBy('price')->get();
+    }
+
+    /**
+     * Lấy tất cả loại phòng với khuyến mại đang áp dụng
+     *
+     * @return Collection
+     */
+    public function getAllRoomTypesWithPromotions(): Collection
+    {
+        return $this->model->with(['promotions' => function($query) {
+            $query->where('is_active', true)
+                  ->where('valid_from', '<=', now())
+                  ->where('expired_at', '>', now());
+        }])->get();
     }
 }

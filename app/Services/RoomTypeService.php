@@ -44,31 +44,65 @@ class RoomTypeService implements RoomTypeServiceInterface
     {
         $this->validateFilters($filters);
 
-        $query = $this->roomTypeRepository->newQuery();
-
-        // Gộp tìm theo keyword hoặc loại phòng
-        if (!empty($filters['keyword']) || !empty($filters['type'])) {
-            $query->where(function ($q) use ($filters) {
-                if (!empty($filters['keyword'])) {
-                    $q->orWhere('name', 'like', '%' . $filters['keyword'] . '%');
-                }
-
-                if (!empty($filters['type'])) {
-                    $q->orWhere('id', $filters['type']);
-                }
-            });
-        }
-
-        // Lọc theo khoảng giá (giữ nguyên là AND với các điều kiện trên)
-        if (!empty($filters['price_min'])) {
-            $query->where('price', '>=', (int)$filters['price_min']);
-        }
-
-        if (!empty($filters['price_max'])) {
-            $query->where('price', '<=', (int)$filters['price_max']);
-        }
-
-        return $query->orderBy('price')->get();
+        return $this->roomTypeRepository->searchRoomTypes($filters);
     }
-    
+
+    /**
+     * Lấy tất cả loại phòng với khuyến mại đang áp dụng
+     */
+    public function getAllRoomTypesWithPromotions(): Collection
+    {
+        return $this->roomTypeRepository->getAllRoomTypesWithPromotions();
+    }
+
+    /**
+     * Lấy khuyến mại đang áp dụng cho một loại phòng cụ thể
+     */
+    public function getActivePromotionsForRoomType(int $roomTypeId): Collection
+    {
+        $roomType = $this->roomTypeRepository->findById($roomTypeId);
+        if (!$roomType) {
+            return collect();
+        }
+
+        return $roomType->promotions()
+            ->where('is_active', true)
+            ->where('valid_from', '<=', now())
+            ->where('expired_at', '>', now())
+            ->get();
+    }
+
+    /**
+     * Tìm kiếm loại phòng với khuyến mại
+     */
+    public function searchRoomTypesWithPromotions(array $filters): Collection
+    {
+        $this->validateFilters($filters);
+        
+        // Lấy tất cả loại phòng với khuyến mại
+        $roomTypes = $this->roomTypeRepository->getAllRoomTypesWithPromotions();
+        
+        // Áp dụng filter
+        return $roomTypes->filter(function($roomType) use ($filters) {
+            $match = true;
+            
+            if (!empty($filters['keyword'])) {
+                $match = $match && (stripos($roomType->name, $filters['keyword']) !== false);
+            }
+            
+            if (!empty($filters['type'])) {
+                $match = $match && ($roomType->id == $filters['type']);
+            }
+            
+            if (!empty($filters['price_min'])) {
+                $match = $match && ($roomType->price >= (int)$filters['price_min']);
+            }
+            
+            if (!empty($filters['price_max'])) {
+                $match = $match && ($roomType->price <= (int)$filters['price_max']);
+            }
+            
+            return $match;
+        })->sortBy('price');
+    }
 }

@@ -217,4 +217,26 @@ class PromotionRepository implements PromotionRepositoryInterface
 
         return $query->orderBy('created_at', 'desc')->paginate($perPage);
     }
+
+    /**
+     * Lấy danh sách khuyến mãi có thể áp dụng cho loại phòng
+     *
+     * @param int $roomTypeId
+     * @param float $price
+     * @return Collection
+     */
+    public function getAvailablePromotionsForRoomType(int $roomTypeId, float $price): Collection
+    {
+        return $this->model->query()
+            ->active()
+            ->available()
+            ->where(function($query) use ($roomTypeId) {
+                $query->whereHas('roomTypes', function($q) use ($roomTypeId) {
+                    $q->where('room_type_id', $roomTypeId);
+                })->orWhere('apply_scope', 'all');
+            })
+            ->where('minimum_amount', '<=', $price)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
 } 

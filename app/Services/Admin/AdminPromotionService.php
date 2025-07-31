@@ -2,345 +2,374 @@
 
 namespace App\Services\Admin;
 
-use App\Interfaces\Services\Admin\AdminPromotionServiceInterface;
-use App\Interfaces\Repositories\Admin\AdminPromotionRepositoryInterface;
 use App\Models\Promotion;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\RoomType;
+use App\Models\Room;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
-class AdminPromotionService implements AdminPromotionServiceInterface
+class AdminPromotionService implements \App\Interfaces\Services\Admin\AdminPromotionServiceInterface
 {
-    protected $promotionRepository;
-
-    public function __construct(AdminPromotionRepositoryInterface $promotionRepository)
-    {
-        $this->promotionRepository = $promotionRepository;
-    }
-
     /**
-     * Lấy danh sách promotion cho admin
+     * Lấy danh sách khuyến mại có phân trang và lọc
      */
-    public function getPromotions(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function getPromotions(array $filters = [], int $perPage = 15)
     {
-        return $this->promotionRepository->getByFilters($filters, $perPage);
+        $query = Promotion::query();
+        
+        // Filter by status
+        if (isset($filters['status'])) {
+            if ($filters['status'] === 'active') {
+                $query->active();
+            } elseif ($filters['status'] === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+        
+        // Filter by featured
+        if (isset($filters['featured'])) {
+            $query->where('is_featured', filter_var($filters['featured'], FILTER_VALIDATE_BOOLEAN));
+        }
+        
+        // Filter by discount type
+        if (isset($filters['discount_type'])) {
+            $query->where('discount_type', $filters['discount_type']);
+        }
+        
+        // Search by title, code, description
+        if (!empty($filters['search'])) {
+            $search = '%' . $filters['search'] . '%';
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', $search)
+                  ->orWhere('code', 'like', $search)
+                  ->orWhere('description', 'like', $search);
+            });
+        }
+        
+        return $query->latest()->paginate($perPage);
     }
 
     /**
-     * Lấy chi tiết promotion
+     * Lấy thống kê tổng quan
+     */
+    public function getStats(): array
+    {
+        return [
+            'total' => Promotion::count(),
+            'active' => Promotion::active()->count(),
+            'featured' => Promotion::featured()->count(),
+            'expired' => Promotion::where('expired_at', '<', now())->count()
+        ];
+    }
+
+    /**
+     * Lấy chi tiết khuyến mại
      */
     public function getPromotion(int $id): Promotion
     {
-        $promotion = $this->promotionRepository->findById($id);
-        
-        if (!$promotion) {
-            throw new \Exception('Không tìm thấy khuyến mại này.');
-        }
-
+        $promotion = Promotion::with(['roomTypes'])->findOrFail($id);
         return $promotion;
     }
 
     /**
-     * Tạo promotion mới
+     * Tạo khuyến mại mới
      */
     public function createPromotion(array $data): Promotion
     {
-        Log::info('=== AdminPromotionService::createPromotion ===');
-        Log::info('Input data', $data);
-        
-        $rules = $this->validatePromotionData($data);
-        
-        $validator = Validator::make($data, $rules['rules'], $rules['messages']);
-        
+        // 1. Validate dữ liệu
+        $validator = $this->getValidator($data);
         if ($validator->fails()) {
-            Log::error('Validation failed', $validator->errors()->toArray());
-            throw new \Illuminate\Validation\ValidationException($validator);
+            throw new ValidationException($validator);
         }
-
-        // Xử lý upload hình ảnh
-        if (isset($data['image']) && $data['image']) {
-            $data['image'] = $this->handleImageUpload($data['image']);
-        }
-
-        // Xử lý các field số có thể null/empty
-        $data['minimum_amount'] = $data['minimum_amount'] ?: 0;
-        $data['usage_limit'] = $data['usage_limit'] ?: null;
         
-        Log::info('Creating promotion with data', $data);
-        
-        // Tạo promotion
-        $promotion = $this->promotionRepository->create($data);
-        
-        Log::info('Promotion created with ID', ['id' => $promotion->id]);
-
-        // Sync room types hoặc rooms dựa vào apply_scope
-        $this->syncPromotionScope($promotion, $data);
-
-        return $promotion;
-    }
-
-    /**
-     * Cập nhật promotion
-     */
-    public function updatePromotion(int $id, array $data): bool
-    {
-        $promotion = $this->getPromotion($id);
-        
-        $rules = $this->validatePromotionData($data, $id);
-        
-        $validator = Validator::make($data, $rules['rules'], $rules['messages']);
-        
-        if ($validator->fails()) {
-            throw new \Illuminate\Validation\ValidationException($validator);
-        }
-
-        // Xử lý upload hình ảnh mới
-        if (isset($data['image']) && $data['image']) {
-            // Xóa ảnh cũ
-            if ($promotion->image) {
-                Storage::disk('public')->delete($promotion->image);
+        try {
+            DB::beginTransaction();
+            
+            // 2. Xử lý dữ liệu
+            $data = $this->processData($data);
+            
+            // 3. Tạo promotion
+            $promotion = Promotion::create($data);
+            
+            // 4. Xử lý relationships
+            $this->syncPromotionScope($promotion, $data);
+            
+            // 5. Upload hình ảnh nếu có
+            if (isset($data['image']) && $data['image']) {
+                $this->handleImageUpload($promotion, $data['image']);
             }
-            $data['image'] = $this->handleImageUpload($data['image']);
+            
+            DB::commit();
+            return $promotion;
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating promotion: ' . $e->getMessage());
+            throw $e;
         }
-
-        // Xử lý các field số có thể null/empty
-        $data['minimum_amount'] = $data['minimum_amount'] ?: 0;
-        $data['usage_limit'] = $data['usage_limit'] ?: null;
-
-        $result = $this->promotionRepository->update($id, $data);
-
-        // Sync room types hoặc rooms dựa vào apply_scope
-        $this->syncPromotionScope($promotion, $data);
-
-        return $result;
     }
 
     /**
-     * Xóa promotion
+     * Cập nhật khuyến mại
+     */
+    public function updatePromotion(int $id, array $data): Promotion
+    {
+        // 1. Validate dữ liệu
+        $validator = $this->getValidator($data, $id);
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+        
+        try {
+            DB::beginTransaction();
+            
+            // 2. Lấy promotion
+            $promotion = Promotion::findOrFail($id);
+            
+            // 3. Xử lý dữ liệu
+            $data = $this->processData($data);
+            
+            // 4. Cập nhật promotion
+            $promotion->update($data);
+            
+            // 5. Xử lý relationships
+            $this->syncPromotionScope($promotion, $data);
+            
+            // 6. Upload hình ảnh mới nếu có
+            if (isset($data['image']) && $data['image']) {
+                $this->handleImageUpload($promotion, $data['image']);
+            }
+            
+            DB::commit();
+            return $promotion;
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating promotion: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Xóa khuyến mại
      */
     public function deletePromotion(int $id): array
     {
         try {
-            $promotion = $this->getPromotion($id);
+            $promotion = Promotion::findOrFail($id);
             
-            // Kiểm tra logic xóa theo trạng thái
-            $isExpired = $promotion->expired_at < now();
-            $isActive = $promotion->is_active;
-            
-            // Logic xóa mới:
-            // - CHỈ được xóa khi "Sắp diễn ra" (chưa active và chưa hết hạn)
-            // - KHÔNG được xóa khi "Đang hoạt động" 
-            // - KHÔNG được xóa khi "Đã kết thúc"
-            
-            if ($isExpired) {
-                return [
-                    'success' => false,
-                    'message' => 'Không thể xóa khuyến mại đã kết thúc.'
-                ];
-            }
-            
-            if ($isActive) {
-                return [
-                    'success' => false,
-                    'message' => 'Không thể xóa khuyến mại đang hoạt động. Vui lòng tắt kích hoạt trước.'
-                ];
-            }
-            
-            // Chỉ cho phép xóa khi: !$isActive && !$isExpired (tức là "Sắp diễn ra")
-
             // Xóa hình ảnh nếu có
             if ($promotion->image) {
-                Storage::disk('public')->delete($promotion->image);
+                Storage::delete($promotion->image);
             }
-
-            $this->promotionRepository->delete($id);
-
+            
+            $promotion->delete();
+            
             return [
                 'success' => true,
-                'message' => 'Xóa khuyến mại thành công.'
+                'message' => 'Xóa khuyến mại thành công!'
             ];
-
+            
         } catch (\Exception $e) {
+            Log::error('Error deleting promotion: ' . $e->getMessage());
+            
             return [
                 'success' => false,
-                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+                'message' => 'Có lỗi xảy ra khi xóa khuyến mại.'
             ];
         }
     }
 
     /**
-     * Validate dữ liệu promotion
-     */
-    public function validatePromotionData(array $data, ?int $id = null): array
-    {
-        // Tạo unique rule cho code sử dụng Rule class
-        $codeRules = ['required', 'string', 'max:50', 'alpha_dash'];
-        if ($id) {
-            $codeRules[] = Rule::unique('promotions', 'code')->ignore($id);
-        } else {
-            $codeRules[] = 'unique:promotions,code';
-        }
-
-        // Tạo date rule cho expired_at
-        $dateRule = $id ? 'required|date' : 'required|date|after:today';
-
-        $rules = [
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'code' => $codeRules,
-            'discount_type' => 'required|in:percentage,fixed',
-            'discount_value' => 'required|numeric|min:0',
-            'minimum_amount' => 'nullable|numeric|min:0',
-            'usage_limit' => 'nullable|integer|min:1',
-            'valid_from' => 'nullable|date|before_or_equal:expired_at',
-            'expired_at' => $dateRule,
-            'is_active' => 'boolean',
-            'is_featured' => 'boolean',
-            'can_combine' => 'boolean',
-            'apply_scope' => 'nullable|in:all,room_types,specific_rooms',
-            'room_type_ids' => 'nullable|array',
-            'room_type_ids.*' => 'exists:room_types,id',
-            'room_ids' => 'nullable|array', 
-            'room_ids.*' => 'exists:rooms,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'terms_conditions' => 'nullable|string'
-        ];
-
-        // Validation riêng cho discount_value theo discount_type
-        if (isset($data['discount_type'])) {
-            if ($data['discount_type'] === 'percentage') {
-                $rules['discount_value'] = 'required|numeric|min:0|max:100';
-            } else {
-                $rules['discount_value'] = 'required|numeric|min:0';
-            }
-        }
-
-        $messages = [
-            'title.required' => 'Tiêu đề là bắt buộc.',
-            'title.max' => 'Tiêu đề không được vượt quá 255 ký tự.',
-            'description.required' => 'Mô tả là bắt buộc.',
-            'code.required' => 'Mã khuyến mại là bắt buộc.',
-            'code.unique' => 'Mã khuyến mại đã tồn tại.',
-            'code.alpha_dash' => 'Mã chỉ được chứa chữ cái, số, dấu gạch ngang và gạch dưới.',
-            'discount_type.required' => 'Loại giảm giá là bắt buộc.',
-            'discount_type.in' => 'Loại giảm giá không hợp lệ.',
-            'discount_value.required' => 'Giá trị giảm giá là bắt buộc.',
-            'discount_value.min' => 'Giá trị giảm giá phải lớn hơn 0.',
-            'discount_value.max' => 'Giá trị giảm giá phần trăm không được vượt quá 100.',
-            'valid_from.date' => 'Ngày bắt đầu phải là ngày hợp lệ.',
-            'valid_from.before_or_equal' => 'Ngày bắt đầu phải trước hoặc bằng ngày hết hạn.',
-            'expired_at.required' => 'Ngày hết hạn là bắt buộc.',
-            'expired_at.after' => 'Ngày hết hạn phải sau ngày hôm nay.',
-            'image.image' => 'File phải là hình ảnh.',
-            'image.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif.',
-            'image.max' => 'Kích thước hình ảnh không được vượt quá 2MB.'
-        ];
-
-        return [
-            'rules' => $rules,
-            'messages' => $messages
-        ];
-    }
-
-    /**
-     * Lấy thống kê promotion
-     */
-    public function getStats(): array
-    {
-        return $this->promotionRepository->getStats();
-    }
-
-    /**
-     * Toggle trạng thái promotion
+     * Toggle trạng thái
      */
     public function toggleStatus(int $id, string $type): array
     {
         try {
-            $success = false;
+            $promotion = Promotion::findOrFail($id);
             
             switch ($type) {
                 case 'active':
-                    $success = $this->promotionRepository->toggleActive($id);
-                    $message = 'Cập nhật trạng thái thành công.';
+                    $promotion->is_active = !$promotion->is_active;
+                    $message = $promotion->is_active ? 'kích hoạt' : 'tạm dừng';
                     break;
                     
                 case 'featured':
-                    $success = $this->promotionRepository->toggleFeatured($id);
-                    $message = 'Cập nhật trạng thái nổi bật thành công.';
+                    $promotion->is_featured = !$promotion->is_featured;
+                    $message = $promotion->is_featured ? 'đặt nổi bật' : 'bỏ nổi bật';
                     break;
                     
                 default:
-                    throw new \Exception('Loại trạng thái không hợp lệ.');
+                    throw new \InvalidArgumentException('Invalid status type.');
             }
-
+            
+            $promotion->save();
+            
             return [
-                'success' => $success,
-                'message' => $success ? $message : 'Có lỗi xảy ra khi cập nhật.'
+                'success' => true,
+                'message' => "Đã $message khuyến mại thành công!",
+                'data' => [
+                    'is_active' => $promotion->is_active,
+                    'is_featured' => $promotion->is_featured
+                ]
             ];
-
+            
         } catch (\Exception $e) {
+            Log::error('Error toggling promotion status: ' . $e->getMessage());
+            
             return [
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'Có lỗi xảy ra khi thay đổi trạng thái.'
             ];
         }
     }
 
     /**
-     * Sync promotion scope (room types hoặc specific rooms)
+     * Validator cho promotion
      */
-    protected function syncPromotionScope($promotion, array $data): void
+    protected function getValidator(array $data, ?int $id = null): \Illuminate\Validation\Validator
     {
-        $applyScope = $data['apply_scope'] ?? 'all';
+        $rules = [
+            'title' => 'required|string|max:255',
+            'code' => 'required|string|max:50|regex:/^[A-Z0-9_-]+$/|unique:promotions,code' . ($id ? ",$id" : ''),
+            'description' => 'required|string',
+            'terms_conditions' => 'nullable|string',
+            'discount_type' => 'required|in:percentage,fixed',
+            'discount_value' => 'required|numeric|min:0',
+            'minimum_amount' => 'nullable|numeric|min:0',
+            'usage_limit' => 'nullable|integer|min:1',
+            'valid_from' => 'nullable|date',
+            'expired_at' => 'required|date|after:valid_from',
+            'apply_scope' => 'required|in:all,room_types',
+            'image' => 'nullable|image|max:2048', // 2MB max
+            'is_active' => 'boolean',
+            'is_featured' => 'boolean',
+            'can_combine' => 'boolean'
+        ];
         
-        Log::info('=== syncPromotionScope ===');
-        Log::info('Apply scope', ['scope' => $applyScope]);
-        Log::info('Data', $data);
-        
-        switch ($applyScope) {
-            case 'room_types':
-                // Sync room types, clear rooms
-                $roomTypeIds = $data['room_type_ids'] ?? [];
-                Log::info('Syncing room types', ['room_type_ids' => $roomTypeIds]);
-                $promotion->roomTypes()->sync($roomTypeIds);
-                $promotion->rooms()->sync([]);
-                break;
-                
-            case 'specific_rooms':
-                // Sync specific rooms, clear room types  
-                $roomIds = $data['room_ids'] ?? [];
-                Log::info('Syncing specific rooms', ['room_ids' => $roomIds]);
-                $promotion->rooms()->sync($roomIds);
-                $promotion->roomTypes()->sync([]);
-                break;
-                
-            case 'all':
-            default:
-                // Clear both - apply to all rooms
-                Log::info('Clearing all room relationships - apply to all');
-                $promotion->roomTypes()->sync([]);
-                $promotion->rooms()->sync([]);
-                break;
+        // Thêm validation cho room_type_ids
+        if (isset($data['apply_scope']) && $data['apply_scope'] === 'room_types') {
+            $rules['room_type_ids'] = 'required|array|min:1';
+            $rules['room_type_ids.*'] = 'required|exists:room_types,id';
         }
         
-        Log::info('Sync completed');
+        // Custom messages
+        $messages = [
+            'code.regex' => 'Mã khuyến mại chỉ được chứa chữ cái in hoa, số và dấu gạch ngang.',
+            'expired_at.after' => 'Ngày hết hạn phải sau ngày bắt đầu.',
+            'room_type_ids.required' => 'Vui lòng chọn ít nhất một loại phòng.',
+
+            'image.max' => 'Hình ảnh không được vượt quá 2MB.'
+        ];
+        
+        return Validator::make($data, $rules, $messages);
+    }
+
+    /**
+     * Xử lý dữ liệu trước khi lưu
+     */
+    protected function processData(array $data): array
+    {
+        // 1. Xử lý các trường boolean
+        $data['is_active'] = $data['is_active'] ?? false;
+        $data['is_featured'] = $data['is_featured'] ?? false;
+        $data['can_combine'] = $data['can_combine'] ?? false;
+        
+        // 2. Xử lý các trường số
+        $data['minimum_amount'] = !empty($data['minimum_amount']) ? (float)$data['minimum_amount'] : 0;
+        $data['usage_limit'] = !empty($data['usage_limit']) ? (int)$data['usage_limit'] : null;
+        
+        // 3. Xử lý ngày tháng
+        $data['valid_from'] = !empty($data['valid_from']) ? $data['valid_from'] : null;
+        
+        // 4. Xử lý discount value
+        if ($data['discount_type'] === 'percentage') {
+            $data['discount_value'] = min((float)$data['discount_value'], 100);
+        }
+        
+        // 5. Xử lý apply_scope dựa trên dữ liệu gửi lên
+        if (!empty($data['room_type_ids'])) {
+            $data['apply_scope'] = 'room_types';
+        } else {
+            $data['apply_scope'] = 'all';
+        }
+        
+        // Log để debug
+        Log::info('Processed promotion data', [
+            'apply_scope' => $data['apply_scope'],
+            'has_room_types' => !empty($data['room_type_ids'])
+        ]);
+        
+        return $data;
     }
 
     /**
      * Xử lý upload hình ảnh
      */
-    public function handleImageUpload($image): ?string
+    protected function handleImageUpload(Promotion $promotion, $image): void
     {
-        if (!$image) {
-            return null;
+        // Xóa ảnh cũ nếu có
+        if ($promotion->image) {
+            Storage::delete($promotion->image);
         }
-
-        $fileName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-        $path = $image->storeAs('promotions', $fileName, 'public');
         
-        return $path;
+        // Upload ảnh mới
+        $path = $image->store('promotions', 'public');
+        $promotion->update(['image' => $path]);
+    }
+
+    /**
+     * Xử lý relationships của promotion
+     */
+    protected function syncPromotionScope(Promotion $promotion, array $data): void
+    {
+        try {
+            $applyScope = $data['apply_scope'] ?? 'all';
+            
+            Log::info('Syncing promotion scope', [
+                'promotion_id' => $promotion->id,
+                'apply_scope' => $applyScope,
+                'room_type_ids' => $data['room_type_ids'] ?? []
+            ]);
+            
+            switch ($applyScope) {
+                case 'room_types':
+                    // Validate room type IDs
+                    $roomTypeIds = array_filter($data['room_type_ids'] ?? [], function($id) {
+                        return is_numeric($id) && $id > 0;
+                    });
+                    
+                    if (empty($roomTypeIds)) {
+                        throw new \InvalidArgumentException('Vui lòng chọn ít nhất một loại phòng.');
+                    }
+                    
+                    // Sync room types
+                    $promotion->roomTypes()->sync($roomTypeIds);
+                    Log::info('Synced room types', ['room_type_ids' => $roomTypeIds]);
+                    break;
+                    
+                case 'all':
+                default:
+                    // Clear room types for "all" scope
+                    $promotion->roomTypes()->sync([]);
+                    Log::info('Applying to all rooms - no specific restrictions');
+                    break;
+            }
+            
+            // Clear cache
+            $promotion->clearApplyCache();
+            
+        } catch (\Exception $e) {
+            Log::error('Error in syncPromotionScope', [
+                'error' => $e->getMessage(),
+                'promotion_id' => $promotion->id ?? null,
+                'apply_scope' => $applyScope ?? null,
+                'data' => $data
+            ]);
+            throw $e;
+        }
     }
 } 

@@ -91,6 +91,124 @@
         .rating-input input[type="radio"]:checked ~ .rating-star {
             color: #ffc107;
         }
+        
+        /* Styles cho phần hiển thị khuyến mại - thiết kế nhỏ gọn */
+        .promotions-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+        
+        .promotion-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            color: #495057;
+            line-height: 1.4;
+        }
+        
+        .promotion-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .promotion-label {
+            color: #495057;
+            font-weight: 600;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        
+        .promotion-value {
+            background: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(220, 53, 69, 0.3);
+        }
+        
+        .promotion-title {
+            color: #495057;
+            font-weight: 500;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-height: 3.9em;
+        }
+        
+        .promotion-text {
+            color: #6c757d;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+        
+        /* Đảm bảo các thẻ phòng có chiều cao đồng đều */
+        .ftco-animate .room {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .ftco-animate .room .text {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .ftco-animate .room .text .list {
+            flex-grow: 1;
+            margin-bottom: 10px;
+        }
+        
+        .ftco-animate .room .text .pt-1 {
+            margin-top: auto;
+        }
+        
+        /* Đảm bảo các cột trong hàng có chiều cao đồng đều */
+        .row .col-sm,
+        .row .col-md-6,
+        .row .col-lg-4 {
+            display: flex;
+            margin-bottom: 30px;
+        }
+        
+        .row .col-sm .ftco-animate,
+        .row .col-md-6 .ftco-animate,
+        .row .col-lg-4 .ftco-animate {
+            width: 100%;
+        }
+        
+        /* Responsive cho phần khuyến mại */
+        @media (max-width: 768px) {
+            .promotions-section {
+                padding: 8px;
+                margin: 8px 0;
+                min-height: 60px;
+            }
+            
+            .promotion-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+                padding: 5px 8px;
+            }
+            
+            .promotion-label {
+                font-size: 0.85em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -834,6 +952,271 @@
             font-size: 1rem;
         }
     }
+    
+    /* CSS cho sidebar - đảm bảo hiển thị hàng dọc */
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .sidebar .sidebar-box {
+        width: 100%;
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+    
+    /* Đảm bảo form tìm kiếm hiển thị đúng */
+    .sidebar .sidebar-box form {
+        width: 100%;
+    }
+    
+    .sidebar .sidebar-box .fields {
+        width: 100%;
+    }
+    
+    .sidebar .sidebar-box .form-group {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .sidebar .sidebar-box .form-control {
+        width: 100%;
+    }
+    
+    /* Đảm bảo categories hiển thị đúng */
+    .sidebar .sidebar-box .categories {
+        width: 100%;
+    }
+    
+    .sidebar .sidebar-box .categories ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .sidebar .sidebar-box .categories li {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    
+    .sidebar .sidebar-box .categories a {
+        display: block;
+        width: 100%;
+        padding: 8px 12px;
+        text-decoration: none;
+        color: #333;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar .sidebar-box .categories a:hover {
+        background-color: #f8f9fa;
+        color: #007bff;
+    }
+    
+    /* Đảm bảo form đặt phòng hiển thị đúng */
+    .sidebar .sidebar-box form.p-3 {
+        width: 100%;
+    }
+    
+    .sidebar .sidebar-box form .form-group {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .sidebar .sidebar-box form .btn {
+        width: 100%;
+    }
+    
+            /* Responsive cho sidebar */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                margin-top: 30px;
+            }
+        }
+        
+        /* CSS cho phần hiển thị ưu đãi phòng - thiết kế mới với màu #F8F9FA */
+        .room-promotions-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .promotions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .promotions-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .promotions-title i {
+            font-size: 1.5rem;
+            color: #6c757d;
+        }
+        
+        .promotions-title h5 {
+            color: #2c3e50;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .promotions-count .badge {
+            font-size: 0.8rem;
+            padding: 8px 12px;
+            border-radius: 20px;
+            background-color: #6c757d;
+            color: #fff;
+        }
+        
+        .promotions-grid {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .promotion-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .promotion-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6c757d, #495057);
+        }
+        
+        .promotion-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.2);
+        }
+        
+        .promotion-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .promotion-main {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .discount-badge {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .promotion-title {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1rem;
+            margin: 0;
+            flex: 1;
+        }
+        
+        /* CSS cho trường hợp không có ưu đãi */
+        .no-promotions-section {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        
+        .no-promotions-icon {
+            margin-bottom: 15px;
+        }
+        
+        .no-promotions-icon i {
+            font-size: 3rem;
+            color: #6c757d;
+            opacity: 0.5;
+        }
+        
+        .no-promotions-title {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .no-promotions-text {
+            color: #6c757d;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .no-promotions-actions .btn {
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            border-color: #6c757d;
+            color: #6c757d;
+        }
+        
+        .no-promotions-actions .btn:hover {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        
+        /* Responsive cho phần ưu đãi */
+        @media (max-width: 768px) {
+            .room-promotions-section {
+                padding: 20px 15px;
+                margin: 15px 0;
+            }
+            
+            .promotions-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .promotion-card {
+                padding: 15px;
+            }
+            
+            .promotion-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .expiry-info {
+                text-align: left;
+            }
+            
+            .promotion-details {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </body>
 </html>

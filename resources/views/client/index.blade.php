@@ -247,6 +247,10 @@
                                 <ul class="list">
                                     <li><span>Sức chứa:</span> {{ $type->capacity }} Người</li>
                                 </ul>
+                                
+                                {{-- Hiển thị khuyến mại cho loại phòng --}}
+                                @include('components.room-promotions', ['roomType' => $type])
+                                
                                 <hr>
                                 <p class="pt-1">
                                     <a href="{{ route('rooms-single', $type->id) }}" class="btn-custom">

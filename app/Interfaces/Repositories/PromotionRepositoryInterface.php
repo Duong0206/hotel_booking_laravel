@@ -103,4 +103,13 @@ interface PromotionRepositoryInterface
      * @return LengthAwarePaginator
      */
     public function getAllWithFilters(array $filters = [], int $perPage = 12): LengthAwarePaginator;
+
+    /**
+     * Lấy danh sách khuyến mãi có thể áp dụng cho loại phòng
+     *
+     * @param int $roomTypeId
+     * @param float $price
+     * @return Collection
+     */
+    public function getAvailablePromotionsForRoomType(int $roomTypeId, float $price): Collection;
 } 

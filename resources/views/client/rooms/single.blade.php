@@ -55,6 +55,9 @@
                                     <li><span>Mô tả:</span> {{ Str::limit($roomType->description, 100) }}</li>
                                 </ul>
                             </div>
+                            
+                            {{-- Hiển thị khuyến mại cho loại phòng --}}
+                            @include('components.room-promotions', ['roomType' => $roomType])
                             <div class="text-center mb-4">
                                 <button type="button" class="btn btn-primary py-3 px-5" data-bs-toggle="modal" data-bs-target="#roomServicesModal">
                                     <i class="icon-list"></i> Xem dịch vụ loại phòng

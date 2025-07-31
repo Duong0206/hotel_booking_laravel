@@ -34,7 +34,8 @@ class RoomType extends Model
      */
     public function promotions()
     {
-        return $this->belongsToMany(Promotion::class, 'promotion_room_type');
+        return $this->belongsToMany(Promotion::class, 'promotion_room_type', 'room_type_id', 'promotion_id')
+                    ->withTimestamps();
     }
 
     /**

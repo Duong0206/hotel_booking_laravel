@@ -39,7 +39,9 @@ class AdminPromotionController extends Controller
      */
     public function create()
     {
-        $roomTypes = \App\Models\RoomType::with('rooms')->get();
+        // Load room types với số lượng phòng
+        $roomTypes = \App\Models\RoomType::withCount('rooms')->get();
+            
         return view('admin.promotions.create', compact('roomTypes'));
     }
 
@@ -51,16 +53,15 @@ class AdminPromotionController extends Controller
         try {
             $data = $request->all();
             
-            // DEBUG: Log dữ liệu được gửi
-            Log::info('=== PROMOTION STORE DEBUG ===');
-            Log::info('Request data', $data);
+            // DEBUG: Log dữ liệu form để kiểm tra
+            Log::info('Form data received in AdminPromotionController@store', [
+                'apply_scope' => $data['apply_scope'] ?? 'NOT_SET',
+                'room_type_ids' => $data['room_type_ids'] ?? 'NOT_SET',
+                'all_data' => $data
+            ]);
             
-            // Xử lý checkbox boolean
-            $data['is_active'] = $request->has('is_active');
-            $data['is_featured'] = $request->has('is_featured');
-            $data['can_combine'] = $request->has('can_combine');
-            
-            Log::info('Processed data', $data);
+            // Service sẽ tự xử lý boolean fields
+            // Chỉ pass raw data từ form
             
             $this->promotionService->createPromotion($data);
             
@@ -102,8 +103,12 @@ class AdminPromotionController extends Controller
     {
         try {
             $promotion = $this->promotionService->getPromotion((int)$id);
-            $roomTypes = \App\Models\RoomType::with('rooms')->get();
+            
+            // Load room types với số lượng phòng
+            $roomTypes = \App\Models\RoomType::withCount('rooms')->get();
+                
             return view('admin.promotions.edit', compact('promotion', 'roomTypes'));
+            
         } catch (\Exception $e) {
             return redirect()->route('admin.promotions.index')
                 ->with('error', $e->getMessage());
@@ -118,31 +123,20 @@ class AdminPromotionController extends Controller
         try {
             $data = $request->all();
             
-            // DEBUG: Log dữ liệu được gửi
-            Log::info('=== PROMOTION UPDATE DEBUG ===');
-            Log::info('Promotion ID', ['id' => $id]);
-            Log::info('Request data', $data);
-            
-            // Xử lý checkbox boolean
-            $data['is_active'] = $request->has('is_active');
-            $data['is_featured'] = $request->has('is_featured');
-            $data['can_combine'] = $request->has('can_combine');
-            
-            Log::info('Processed data', $data);
+            // Service sẽ tự xử lý boolean fields
+            // Chỉ pass raw data từ form
             
             $this->promotionService->updatePromotion((int)$id, $data);
             
-            return redirect()->route('admin.promotions.index')
+            return redirect()->route('admin.promotions.show', $id)
                 ->with('success', 'Cập nhật khuyến mại thành công!');
                 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Validation error in update', $e->errors());
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             Log::error('Error in AdminPromotionController@update: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
             return redirect()->back()
                 ->with('error', 'Có lỗi xảy ra khi cập nhật khuyến mại: ' . $e->getMessage())
                 ->withInput();

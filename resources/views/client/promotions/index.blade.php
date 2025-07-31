@@ -160,10 +160,6 @@
     box-shadow: 0 15px 35px rgba(0,0,0,0.1);
 }
 
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
 .filter-form {
     background: white;
     padding: 25px;
@@ -234,7 +230,6 @@
     font-weight: 500;
 }
 
-/* Heading Section Styles */
 .heading-section h2 {
     font-size: 2.5rem;
     font-weight: 700;
@@ -247,14 +242,6 @@
     color: #6c757d;
     line-height: 1.6;
     margin-bottom: 0;
-}
-
-.card-img-top {
-    transition: transform 0.4s ease;
-}
-
-.promotion-card:hover .card-img-top {
-    transform: scale(1.05);
 }
 
 .card-body {
@@ -271,27 +258,6 @@
 .card-text {
     line-height: 1.6;
     margin-bottom: 1.2rem;
-}
-
-.promotion-info {
-    background: #f8f9fa;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 1.5rem;
-}
-
-.promotion-info small {
-    margin-bottom: 8px;
-    padding: 4px 0;
-    display: flex;
-    align-items: center;
-}
-
-.promotion-info i {
-    width: 18px;
-    text-align: center;
-    margin-right: 8px;
-    color: #667eea;
 }
 
 .btn-sm {
@@ -337,7 +303,6 @@
     margin-bottom: 1.5rem;
 }
 
-/* Pagination Styling */
 .pagination {
     justify-content: center;
 }
@@ -364,22 +329,6 @@
     border-color: #667eea;
 }
 
-/* Header Section */
-.heading-section h2 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #2c3e50;
-    position: relative;
-    margin-bottom: 1rem;
-}
-
-.heading-section p {
-    font-size: 1.1rem;
-    color: #6c757d;
-    line-height: 1.6;
-}
-
-/* Responsive Design */
 @media (max-width: 768px) {
     .filter-form {
         padding: 20px 15px;
@@ -387,10 +336,6 @@
     
     .card-body {
         padding: 1.25rem;
-    }
-    
-    .promotion-info {
-        padding: 12px;
     }
     
     .btn-sm {
@@ -415,48 +360,6 @@
     .card-title {
         font-size: 1.1rem;
     }
-    
-    .promotion-info small {
-        font-size: 0.8rem;
-    }
-}
-
-/* Animation cho cards */
-.ftco-animate {
-    opacity: 0;
-    animation: fadeInUp 0.6s ease forwards;
-}
-
-.ftco-animate:nth-child(1) { animation-delay: 0.1s; }
-.ftco-animate:nth-child(2) { animation-delay: 0.2s; }
-.ftco-animate:nth-child(3) { animation-delay: 0.3s; }
-.ftco-animate:nth-child(4) { animation-delay: 0.4s; }
-.ftco-animate:nth-child(5) { animation-delay: 0.5s; }
-.ftco-animate:nth-child(6) { animation-delay: 0.6s; }
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Toast container */
-#toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-}
-
-/* Loading state */
-.btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
 }
 </style>
 
@@ -479,218 +382,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
-    // Thêm loading state cho form
-    const filterForm = document.getElementById('filterForm');
-    if (filterForm) {
-        filterForm.addEventListener('submit', function() {
-            const submitBtn = this.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                const originalHTML = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tìm...';
-                submitBtn.disabled = true;
-                
-                // Restore nếu có lỗi
-                setTimeout(() => {
-                    submitBtn.innerHTML = originalHTML;
-                    submitBtn.disabled = false;
-                }, 10000);
-            }
-        });
-    }
-    
-    // Animation cho promotion cards
-    const promotionCards = document.querySelectorAll('.promotion-card');
-    promotionCards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.1}s`;
-    });
-    
-    // Copy promotion code functionality
-    window.copyPromotionCode = function(code) {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(code).then(function() {
-                showToast('Đã sao chép mã: ' + code, 'success');
-            }).catch(function(err) {
-                console.error('Không thể sao chép: ', err);
-                fallbackCopy(code);
-            });
-        } else {
-            fallbackCopy(code);
-        }
-    };
-    
-    // Fallback copy function
-    function fallbackCopy(code) {
-        const textArea = document.createElement('textarea');
-        textArea.value = code;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
-        try {
-            document.execCommand('copy');
-            showToast('Đã sao chép mã: ' + code, 'success');
-        } catch (err) {
-            console.error('Fallback copy cũng thất bại: ', err);
-            showToast('Không thể sao chép. Vui lòng copy thủ công: ' + code, 'warning');
-        }
-        
-        document.body.removeChild(textArea);
-    }
 });
-
-// Toast notification function
-function showToast(message, type = 'info') {
-    let toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.id = 'toast-container';
-        toastContainer.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-        `;
-        document.body.appendChild(toastContainer);
-    }
-    
-    const alertClass = type === 'success' ? 'alert-success' : 
-                     type === 'warning' ? 'alert-warning' : 
-                     type === 'error' ? 'alert-danger' : 'alert-info';
-    
-    const toast = document.createElement('div');
-    toast.className = `alert ${alertClass} alert-dismissible fade show`;
-    toast.style.cssText = `
-        margin-bottom: 10px;
-        min-width: 300px;
-        max-width: 400px;
-        animation: slideInToast 0.3s ease;
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    `;
-    
-    const icon = type === 'success' ? 'fa-check-circle' :
-                type === 'warning' ? 'fa-exclamation-triangle' :
-                type === 'error' ? 'fa-times-circle' : 'fa-info-circle';
-    
-    toast.innerHTML = `
-        <i class="fas ${icon} mr-2"></i>${message}
-        <button type="button" class="close" onclick="this.parentElement.remove()" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    `;
-    
-    toastContainer.appendChild(toast);
-    
-    // Auto remove after 4 seconds
-    setTimeout(() => {
-        if (toast.parentNode) {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.remove();
-                }
-            }, 300);
-        }
-    }, 4000);
-}
-
-// Animation styles
-const animationStyle = document.createElement('style');
-animationStyle.textContent = `
-    @keyframes slideInToast {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    .alert {
-        position: relative;
-        border: none;
-    }
-    
-    .alert-success {
-        background: linear-gradient(135deg, #d4edda, #c3e6cb);
-        color: #155724;
-        border-left: 4px solid #28a745;
-    }
-    
-    .alert-warning {
-        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-        color: #856404;
-        border-left: 4px solid #ffc107;
-    }
-    
-    .alert-danger {
-        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-        color: #721c24;
-        border-left: 4px solid #dc3545;
-    }
-    
-    .alert-info {
-        background: linear-gradient(135deg, #d1ecf1, #bee5eb);
-        color: #0c5460;
-        border-left: 4px solid #17a2b8;
-    }
-`;
-document.head.appendChild(animationStyle);
 </script>
-
-<style>
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-card {
-    animation: fadeInUp 0.6s ease forwards;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-.form-label {
-    font-weight: 600;
-    margin-bottom: 5px;
-    display: block;
-}
-
-.filter-form {
-    position: relative;
-}
-
-.filter-form::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-    background: linear-gradient(45deg, transparent, rgba(0,123,255,0.1), transparent);
-    border-radius: 10px;
-    z-index: -1;
-}
-</style>
 @endsection 

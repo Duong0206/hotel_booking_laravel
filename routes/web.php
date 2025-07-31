@@ -233,12 +233,14 @@ Route::get('/search-rooms', [RoomController::class, 'search'])->name('rooms.sear
 // Payment
 Route::get('/confirm-info-payment/{booking}', [PaymentController::class, 'confirmInfo'])->name('confirm-info-payment');
 Route::get('/payment-method/{booking}', [PaymentController::class, 'paymentMethod'])->name('payment-method');
+Route::post('/calculate-promotion', [PaymentController::class, 'calculatePromotion'])->name('calculate-promotion');
 
 // Promotions
 Route::get('/promotions', [App\Http\Controllers\PromotionController::class, 'index'])->name('promotions.index');
 Route::get('/promotions/{id}', [App\Http\Controllers\PromotionController::class, 'show'])->name('promotions.show');
 Route::post('/promotions/validate-code', [App\Http\Controllers\PromotionController::class, 'validateCode'])->name('promotions.validate-code');
 Route::get('/api/promotions/featured', [App\Http\Controllers\PromotionController::class, 'getFeatured'])->name('promotions.featured');
+Route::post('/check-promotion', [App\Http\Controllers\PromotionController::class, 'checkPromotion'])->name('check-promotion');
 
 // User Profile Routes (chỉ cần đăng nhập, không cần xác minh email)
 Route::middleware('auth')->group(function () {

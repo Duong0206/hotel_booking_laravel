@@ -3,53 +3,41 @@
 namespace App\Interfaces\Services\Admin;
 
 use App\Models\Promotion;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 interface AdminPromotionServiceInterface
 {
     /**
-     * Lấy danh sách promotion cho admin
+     * Lấy danh sách khuyến mại có phân trang và lọc
      */
-    public function getPromotions(array $filters = [], int $perPage = 15): LengthAwarePaginator;
+    public function getPromotions(array $filters = [], int $perPage = 15);
 
     /**
-     * Lấy chi tiết promotion
-     */
-    public function getPromotion(int $id): Promotion;
-
-    /**
-     * Tạo promotion mới
-     */
-    public function createPromotion(array $data): Promotion;
-
-    /**
-     * Cập nhật promotion
-     */
-    public function updatePromotion(int $id, array $data): bool;
-
-    /**
-     * Xóa promotion
-     */
-    public function deletePromotion(int $id): array;
-
-    /**
-     * Validate dữ liệu promotion
-     */
-    public function validatePromotionData(array $data, ?int $id = null): array;
-
-    /**
-     * Lấy thống kê promotion
+     * Lấy thống kê tổng quan
      */
     public function getStats(): array;
 
     /**
-     * Toggle trạng thái promotion
+     * Lấy chi tiết khuyến mại
      */
-    public function toggleStatus(int $id, string $type): array;
+    public function getPromotion(int $id): Promotion;
 
     /**
-     * Xử lý upload hình ảnh
+     * Tạo khuyến mại mới
      */
-    public function handleImageUpload($image): ?string;
+    public function createPromotion(array $data): Promotion;
+
+    /**
+     * Cập nhật khuyến mại
+     */
+    public function updatePromotion(int $id, array $data): Promotion;
+
+    /**
+     * Xóa khuyến mại
+     */
+    public function deletePromotion(int $id): array;
+
+    /**
+     * Toggle trạng thái
+     */
+    public function toggleStatus(int $id, string $type): array;
 } 

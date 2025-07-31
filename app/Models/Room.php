@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\RoomPromotionService;
 
 class Room extends Model
 {
@@ -70,7 +71,44 @@ class Room extends Model
      */
     public function promotions()
     {
-        return $this->belongsToMany(Promotion::class, 'promotion_room');
+        return $this->belongsToMany(Promotion::class, 'promotion_room', 'room_id', 'promotion_id')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Lấy khuyến mại đang áp dụng cho phòng
+     */
+    public function getActivePromotionsAttribute()
+    {
+        $service = app(RoomPromotionService::class);
+        return $service->getAvailablePromotions($this);
+    }
+
+    /**
+     * Lấy khuyến mại tốt nhất cho phòng
+     */
+    public function getBestPromotionAttribute()
+    {
+        $service = app(RoomPromotionService::class);
+        return $service->getBestPromotion($this, $this->price);
+    }
+
+    /**
+     * Lấy text hiển thị khuyến mại
+     */
+    public function getPromotionTextAttribute()
+    {
+        $service = app(RoomPromotionService::class);
+        return $service->getPromotionText($this);
+    }
+
+    /**
+     * Kiểm tra phòng có khuyến mại không
+     */
+    public function getHasPromotionAttribute()
+    {
+        $service = app(RoomPromotionService::class);
+        return $service->hasPromotion($this);
     }
     
     // /**

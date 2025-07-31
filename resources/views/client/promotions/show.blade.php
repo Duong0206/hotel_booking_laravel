@@ -62,6 +62,29 @@
                                         <strong><i class="fas fa-calendar-alt text-warning"></i> Hạn sử dụng:</strong>
                                         <span>Đến ngày {{ $promotion->expired_at->format('d/m/Y') }}</span>
                                     </div>
+                                    <div class="detail-item mb-2">
+                                        <strong><i class="fas fa-building text-info"></i> Phạm vi áp dụng:</strong>
+                                        <div class="mt-2">
+                                            <p class="mb-1">{{ $promotion->apply_scope_text }}</p>
+                                            @if($promotion->apply_scope_details)
+                                                <div class="apply-scope-details small">
+                                                    @foreach($promotion->apply_scope_details as $detail)
+                                                        <div class="mb-2">
+                                                            <strong>{{ $detail['name'] }}</strong>
+                                                            @if(isset($detail['count']))
+                                                                <span class="text-muted">({{ $detail['count'] }})</span>
+                                                            @endif
+                                                            @if(isset($detail['rooms']))
+                                                                <div class="rooms-list">
+                                                                    Phòng: {{ implode(', ', $detail['rooms']) }}
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
                                     @if($promotion->minimum_amount > 0)
                                         <div class="detail-item mb-2">
                                             <strong><i class="fas fa-money-bill text-info"></i> Đơn tối thiểu:</strong>
@@ -233,61 +256,35 @@
 
 <script>
 function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(function() {
-        // Hiển thị thông báo thành công
-        const button = event.target.closest('button');
-        const originalHTML = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-check text-success"></i>';
-        button.classList.add('btn-success');
-        button.classList.remove('btn-outline-secondary');
-        
-        // Khôi phục sau 2 giây
-        setTimeout(function() {
-            button.innerHTML = originalHTML;
-            button.classList.remove('btn-success');
-            button.classList.add('btn-outline-secondary');
-        }, 2000);
-        
-        // Hiển thị toast notification nếu có
-        if (typeof showToast !== 'undefined') {
-            showToast('Đã sao chép mã khuyến mại!', 'success');
-        }
-    }).catch(function(err) {
-        console.error('Không thể sao chép: ', err);
-        // Fallback cho trình duyệt cũ
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() {
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check text-success"></i>';
+            button.classList.add('btn-success');
+            button.classList.remove('btn-outline-secondary');
+            
+            setTimeout(function() {
+                button.innerHTML = originalHTML;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-secondary');
+            }, 2000);
+        });
+    } else {
+        // Fallback for older browsers
         const textArea = document.createElement('textarea');
         textArea.value = text;
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        try {
-            document.execCommand('copy');
-            if (typeof showToast !== 'undefined') {
-                showToast('Đã sao chép mã khuyến mại!', 'success');
-            }
-        } catch (err) {
-            console.error('Fallback copy failed: ', err);
-        }
+        document.execCommand('copy');
         document.body.removeChild(textArea);
-    });
+    }
 }
 
-// Thêm smooth scroll cho các links nội bộ
 document.addEventListener('DOMContentLoaded', function() {
-    // Thêm animation khi hover vào promotion items
+    // Click handler cho promotion items
     const promotionItems = document.querySelectorAll('.promotion-item');
-    promotionItems.forEach(item => {
-        item.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateX(5px)';
-            this.style.transition = 'transform 0.3s ease';
-        });
-        
-        item.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateX(0)';
-        });
-    });
-    
-    // Thêm click handler cho promotion items
     promotionItems.forEach(item => {
         item.addEventListener('click', function() {
             const link = this.querySelector('a');
@@ -297,64 +294,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-
-// Toast notification function (optional)
-function showToast(message, type = 'info') {
-    // Tạo toast element nếu chưa có
-    let toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.id = 'toast-container';
-        toastContainer.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-        `;
-        document.body.appendChild(toastContainer);
-    }
-    
-    const toast = document.createElement('div');
-    toast.className = `alert alert-${type} alert-dismissible fade show`;
-    toast.style.cssText = `
-        margin-bottom: 10px;
-        min-width: 300px;
-        animation: slideIn 0.3s ease;
-    `;
-    toast.innerHTML = `
-        ${message}
-        <button type="button" class="close" data-dismiss="alert">
-            <span>&times;</span>
-        </button>
-    `;
-    
-    toastContainer.appendChild(toast);
-    
-    // Tự động ẩn sau 3 giây
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
-    }, 3000);
-}
-
-// CSS for animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-`;
-document.head.appendChild(style);
 </script>
 @endsection 

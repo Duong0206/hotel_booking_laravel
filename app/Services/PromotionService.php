@@ -102,7 +102,7 @@ class PromotionService implements PromotionServiceInterface
         $promotion = $this->validatePromotionCode($code);
         
         if ($amount < $promotion->minimum_amount) {
-            throw new \Exception('Đơn hàng phải có giá trị tối thiểu ' . number_format($promotion->minimum_amount, 0, ',', '.') . 'đ để áp dụng khuyến mại này.');
+            throw new \Exception('Đơn hàng phải có giá trị tối thiểu ' . number_format((float)$promotion->minimum_amount, 0, ',', '.') . 'đ để áp dụng khuyến mại này.');
         }
 
         $discountAmount = $this->calculateDiscount($promotion, $amount);
@@ -163,5 +163,48 @@ class PromotionService implements PromotionServiceInterface
     public function markAsUsed(int $promotionId): bool
     {
         return $this->promotionRepository->incrementUsedCount($promotionId);
+    }
+
+    /**
+     * Kiểm tra và áp dụng mã giảm giá cho booking
+     *
+     * @param string $code
+     * @param int $bookingId
+     * @return array
+     * @throws \Exception
+     */
+    public function checkAndApplyPromotion(string $code, int $bookingId): array
+    {
+        // Lấy thông tin booking
+        $booking = \App\Models\Booking::findOrFail($bookingId);
+
+        // Kiểm tra và lấy thông tin promotion
+        $promotion = $this->validatePromotionCode($code);
+
+        // Kiểm tra điều kiện áp dụng
+        if ($booking->price < $promotion->minimum_amount) {
+            throw new \Exception('Đơn đặt phòng phải có giá trị tối thiểu ' . number_format((float)$promotion->minimum_amount, 0, ',', '.') . 'đ để áp dụng khuyến mại này.');
+        }
+
+        // Tính toán giảm giá
+        $discountAmount = $this->calculateDiscount($promotion, $booking->price);
+        $finalPrice = $booking->price - $discountAmount;
+
+        return [
+            'discount_amount' => $discountAmount,
+            'total_price' => $finalPrice
+        ];
+    }
+
+    /**
+     * Lấy danh sách khuyến mãi có thể áp dụng cho loại phòng
+     *
+     * @param int $roomTypeId
+     * @param float $price
+     * @return Collection
+     */
+    public function getAvailablePromotionsForRoomType(int $roomTypeId, float $price): Collection
+    {
+        return $this->promotionRepository->getAvailablePromotionsForRoomType($roomTypeId, $price);
     }
 } 
