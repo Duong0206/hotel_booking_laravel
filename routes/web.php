@@ -164,6 +164,10 @@ Route::prefix('/admin')->name('admin.')->middleware(['auth', 'admin'])->group(fu
     Route::get('/support/conversation/{conversationId}/messages', [AdminSupportController::class, 'getNewMessages'])->name('support.getNewMessages');
     Route::post('/support/conversations/updates', [AdminSupportController::class, 'getUpdates'])->name('support.getUpdates');
 
+    // User status routes
+    Route::get('/support/conversation/{conversationId}/user-status', [AdminSupportController::class, 'getUserStatus'])->name('support.getUserStatus');
+    Route::post('/support/conversation/{conversationId}/status', [AdminSupportController::class, 'updateUserStatus'])->name('support.updateUserStatus');
+
     // Routes cho quản lý ảnh phòng
     Route::delete('rooms/{room}/images/{image}', [AdminRoomController::class, 'deleteImage'])->name('rooms.images.delete');
     Route::post('rooms/{room}/images/{image}/primary', [AdminRoomController::class, 'setPrimaryImage'])->name('rooms.images.primary');

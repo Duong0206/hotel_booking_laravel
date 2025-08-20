@@ -7,6 +7,7 @@ use App\Services\SupportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use App\Models\SupportMessage;
 
 class AdminSupportController extends Controller
@@ -44,6 +45,12 @@ class AdminSupportController extends Controller
             'created_at' => $firstMessage->created_at
         ];
 
+        // Cập nhật hoạt động của admin khi vào xem conversation
+        if (Auth::check()) {
+            Cache::put("user_last_activity_" . Auth::id(), now(), 300);
+            Cache::put("user_status_" . Auth::id(), 'online', 300);
+        }
+
         return view('admin.support.show', compact('messages', 'conversation'));
     }
 
@@ -52,10 +59,13 @@ class AdminSupportController extends Controller
         try {
             $request->validate([
                 'message' => 'required|string|min:1|max:1000',
+                'attachments.*' => 'nullable|file|max:10240', // 10MB max
             ], [
                 'message.required' => 'Vui lòng nhập tin nhắn',
                 'message.min' => 'Tin nhắn phải có ít nhất 1 ký tự',
-                'message.max' => 'Tin nhắn không được quá 1000 ký tự'
+                'message.max' => 'Tin nhắn không được quá 1000 ký tự',
+                'attachments.*.file' => 'Tệp đính kèm không hợp lệ',
+                'attachments.*.max' => 'Tệp đính kèm không được quá 10MB'
             ]);
 
             $messageText = trim($request->input('message'));
@@ -81,13 +91,37 @@ class AdminSupportController extends Controller
                 return redirect()->back()->withErrors(['message' => 'Cuộc trò chuyện không tồn tại!']);
             }
 
+            // Cập nhật hoạt động của admin
+            Cache::put("user_last_activity_" . Auth::id(), now(), 300);
+            Cache::put("user_status_" . Auth::id(), 'online', 300);
+
+            // Xử lý attachments nếu có
+            $attachments = [];
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    if ($file->isValid()) {
+                        $fileName = time() . '_' . $file->getClientOriginalName();
+                        $filePath = $file->storeAs('support_attachments', $fileName, 'public');
+
+                        $attachments[] = [
+                            'original_name' => $file->getClientOriginalName(),
+                            'file_path' => $filePath,
+                            'file_size' => $file->getSize(),
+                            'mime_type' => $file->getMimeType()
+                        ];
+                    }
+                }
+            }
+
             // Gửi tin nhắn từ admin
             try {
                 $message = $this->supportService->sendMessage(
                     $conversationId,
                     Auth::id(),
                     'admin',
-                    $messageText
+                    $messageText,
+                    null, // subject
+                    $attachments
                 );
             } catch (\Exception $e) {
                 Log::error('Error sending admin support message: ' . $e->getMessage());
@@ -264,6 +298,124 @@ class AdminSupportController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi lấy cập nhật'
+            ], 500);
+        }
+    }
+
+    public function getUserStatus(Request $request, $conversationId)
+    {
+        try {
+            $userId = $request->get('user_id');
+            if (!$userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User ID không hợp lệ'
+                ], 400);
+            }
+
+            // Kiểm tra conversation tồn tại
+            $firstMessage = SupportMessage::where('conversation_id', $conversationId)->first();
+            if (!$firstMessage) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy cuộc trò chuyện'
+                ], 404);
+            }
+
+            // Kiểm tra user tồn tại và thuộc về conversation này
+            $user = \App\Models\User::find($userId);
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy user'
+                ], 404);
+            }
+
+            // Giả lập trạng thái online/offline dựa trên hoạt động gần đây
+            // Trong thực tế, bạn có thể lưu trạng thái này vào database hoặc cache
+            $lastActivity = Cache::get("user_last_activity_{$userId}");
+            $isOnline = false;
+            $lastSeen = null;
+
+            if ($lastActivity) {
+                $timeDiff = now()->diffInMinutes($lastActivity);
+                $isOnline = $timeDiff <= 5; // Coi là online nếu hoạt động trong 5 phút qua
+                if (!$isOnline) {
+                    $lastSeen = $lastActivity;
+                }
+            } else {
+                // Nếu không có thông tin hoạt động, coi như offline
+                $lastSeen = $user->updated_at ?? now()->subHours(1);
+            }
+
+            return response()->json([
+                'success' => true,
+                'status' => $isOnline ? 'online' : 'offline',
+                'last_seen' => $lastSeen
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getting user status: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi lấy trạng thái user'
+            ], 500);
+        }
+    }
+
+    public function updateUserStatus(Request $request, $conversationId)
+    {
+        try {
+            $userId = $request->input('user_id');
+            $status = $request->input('status');
+
+            if (!$userId || !$status) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Dữ liệu không hợp lệ'
+                ], 400);
+            }
+
+            // Kiểm tra conversation tồn tại
+            $firstMessage = SupportMessage::where('conversation_id', $conversationId)->first();
+            if (!$firstMessage) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy cuộc trò chuyện'
+                ], 404);
+            }
+
+            // Kiểm tra user tồn tại
+            $user = \App\Models\User::find($userId);
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy user'
+                ], 404);
+            }
+
+            // Cập nhật trạng thái user trong cache
+            if ($status === 'online') {
+                Cache::put("user_last_activity_{$userId}", now(), 300); // Lưu trong 5 phút
+                Cache::put("user_status_{$userId}", 'online', 300);
+            } else {
+                Cache::forget("user_status_{$userId}");
+                // Không xóa last_activity để có thể hiển thị "last seen"
+            }
+
+            Log::info("User status updated: User {$userId} is now {$status}");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật trạng thái thành công',
+                'status' => $status
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating user status: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi cập nhật trạng thái'
             ], 500);
         }
     }

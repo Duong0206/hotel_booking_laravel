@@ -14,6 +14,9 @@
     --hover-color: #ECEFF1;
     --success-color: #4CAF50;
     --danger-color: #F44336;
+    --online-color: #4CAF50;
+    --offline-color: #F44336;
+    --neutral-color: #9E9E9E;
 }
 
 /* Ẩn page header chỉ trong trang chat */
@@ -223,6 +226,15 @@ html, body {
     height: 8px;
     border-radius: 50%;
     background: var(--success-color);
+    transition: background-color 0.3s ease;
+}
+
+.online-indicator.offline {
+    background: var(--danger-color);
+}
+
+.online-indicator.error {
+    background: var(--text-light);
 }
 
 .unread-badge {
@@ -449,6 +461,78 @@ html, body {
     transform: none;
 }
 
+/* Attachments Preview */
+.attachments-preview {
+    padding: 10px 15px;
+    border-top: 1px solid var(--border-color);
+    background: var(--background-light);
+}
+
+.preview-title {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+#previewList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 12px;
+    max-width: 200px;
+}
+
+.attachment-item img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.attachment-item .file-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.attachment-item .file-name {
+    font-weight: 500;
+    color: var(--text-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.attachment-item .file-size {
+    color: var(--text-light);
+    font-size: 11px;
+}
+
+.remove-attachment {
+    background: none;
+    border: none;
+    color: var(--danger-color);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.remove-attachment:hover {
+    background: var(--danger-color);
+    color: white;
+}
+
 /* Customer Info */
 .customer-info {
     width: 30%;
@@ -658,8 +742,8 @@ html, body {
                 <div>
                     <h5>{{ $conversation['user']->name ?? 'Khách hàng' }}</h5>
                     <div class="chat-user-status">
-                        <div class="online-indicator"></div>
-                        <span>Online</span>
+                        <div class="online-indicator" id="onlineIndicator" style="background-color: var(--text-light);"></div>
+                        <span id="statusText">Không xác định</span>
                     </div>
                 </div>
             </div>
@@ -687,8 +771,6 @@ html, body {
                         <div class="message-time">{{ $msg->created_at->format('H:i') }}</div>
                         @if($msg->sender_type == 'admin')
                             <div class="message-status">
-                                <i class="fas fa-check-double"></i>
-                                <span>Đã xem</span>
                             </div>
                         @endif
                     </div>
@@ -702,16 +784,24 @@ html, body {
                 <div class="chat-input-wrapper">
                     <textarea id="chatInput" name="message" class="chat-input" placeholder="Nhập tin nhắn..." required></textarea>
                     <div class="chat-attachments">
-                        <button type="button" class="attachment-btn" title="Đính kèm ảnh">
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                        <button type="button" class="attachment-btn" id="imageBtn" title="Đính kèm ảnh">
                             <i class="fas fa-image"></i>
                         </button>
-                        <button type="button" class="attachment-btn" title="Đính kèm file">
+                        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.zip,.rar" style="display: none;">
+                        <button type="button" class="attachment-btn" id="fileBtn" title="Đính kèm file">
                             <i class="fas fa-paperclip"></i>
                         </button>
                     </div>
                     <button type="submit" id="sendBtn" class="send-btn" title="Gửi tin nhắn">
                         <i class="fas fa-paper-plane"></i>
                     </button>
+                </div>
+
+                <!-- Preview attachments -->
+                <div id="attachmentsPreview" class="attachments-preview" style="display: none;">
+                    <div class="preview-title">Tệp đính kèm:</div>
+                    <div id="previewList"></div>
                 </div>
             </form>
         </div>
@@ -767,7 +857,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Ngăn scroll của body
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
-    
+
     const chatMessages = document.getElementById('chatMessages');
     const chatForm = document.getElementById('chatForm');
     const chatInput = document.getElementById('chatInput');
@@ -775,15 +865,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const conversationId = document.getElementById('conversationId').value;
     const searchInput = document.querySelector('.search-input');
     const filterTabs = document.querySelectorAll('.filter-tab');
+    const onlineIndicator = document.getElementById('onlineIndicator');
+    const statusText = document.getElementById('statusText');
+
+    // Attachment elements
+    const imageBtn = document.getElementById('imageBtn');
+    const imageInput = document.getElementById('imageInput');
+    const fileBtn = document.getElementById('fileBtn');
+    const fileInput = document.getElementById('fileInput');
+    const attachmentsPreview = document.getElementById('attachmentsPreview');
+    const previewList = document.getElementById('previewList');
 
     // Realtime chat variables
     let isRealtimeEnabled = false;
     let lastMessageId = 0;
     let isSending = false;
-    
+    let userStatusCheckInterval;
+    let heartbeatInterval;
+
     // Lưu trữ tin nhắn gần đây để tránh trùng lặp
     let recentMessages = [];
     const MAX_RECENT_MESSAGES = 10;
+
+    // Lưu trữ attachments
+    let attachments = [];
+    const MAX_ATTACHMENTS = 5;
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
     // Khởi tạo lastMessageId từ tin nhắn cuối cùng
     const lastMessage = document.querySelector('.message[data-message-id]');
@@ -797,22 +904,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const messageBubble = message.querySelector('.message-bubble');
         const messageTime = message.querySelector('.message-time');
         const messageId = message.getAttribute('data-message-id');
-        
+
         if(messageBubble && messageTime) {
             const content = messageBubble.textContent.trim();
             const senderType = message.classList.contains('sent') ? 'admin' : 'user';
-            
+
             // Parse thời gian từ text
             const timeText = messageTime.textContent;
             const timeMatch = timeText.match(/(\d{1,2}):(\d{2})/);
             let timestamp = new Date().getTime();
-            
+
             if(timeMatch) {
                 const now = new Date();
                 now.setHours(parseInt(timeMatch[1]), parseInt(timeMatch[2]), 0, 0);
                 timestamp = now.getTime();
             }
-            
+
             recentMessages.push({
                 content: content,
                 senderType: senderType,
@@ -821,16 +928,17 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
-    
+
     // Giữ chỉ MAX_RECENT_MESSAGES tin nhắn gần nhất
     if(recentMessages.length > MAX_RECENT_MESSAGES) {
         recentMessages = recentMessages.slice(-MAX_RECENT_MESSAGES);
     }
-    
+
     console.log('Initialized recentMessages:', recentMessages);
 
     // Bắt đầu realtime khi trang load
     startRealtimeChat();
+    startUserStatusMonitoring();
     showAdminChatInfo('Đã kết nối với cuộc trò chuyện!');
 
     // Auto-resize textarea
@@ -838,6 +946,13 @@ document.addEventListener('DOMContentLoaded', function() {
         this.style.height = 'auto';
         this.style.height = Math.min(this.scrollHeight, 100) + 'px';
     });
+
+    // Attachment event listeners
+    imageBtn.addEventListener('click', () => imageInput.click());
+    fileBtn.addEventListener('click', () => fileInput.click());
+
+    imageInput.addEventListener('change', handleImageUpload);
+    fileInput.addEventListener('change', handleFileUpload);
 
     // Send message
     chatForm.addEventListener('submit', function(e) {
@@ -859,6 +974,123 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Attachment handling functions
+    function handleImageUpload(event) {
+        const files = Array.from(event.target.files);
+        files.forEach(file => {
+            if (attachments.length >= MAX_ATTACHMENTS) {
+                showAdminChatError(`Chỉ được đính kèm tối đa ${MAX_ATTACHMENTS} tệp!`);
+                return;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                showAdminChatError(`Tệp ${file.name} quá lớn! Kích thước tối đa: ${formatFileSize(MAX_FILE_SIZE)}`);
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                showAdminChatError(`Tệp ${file.name} không phải là ảnh!`);
+                return;
+            }
+
+            addAttachment(file, 'image');
+        });
+
+        // Reset input
+        event.target.value = '';
+    }
+
+    function handleFileUpload(event) {
+        const files = Array.from(event.target.files);
+        files.forEach(file => {
+            if (attachments.length >= MAX_ATTACHMENTS) {
+                showAdminChatError(`Chỉ được đính kèm tối đa ${MAX_ATTACHMENTS} tệp!`);
+                return;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                showAdminChatError(`Tệp ${file.name} quá lớn! Kích thước tối đa: ${formatFileSize(MAX_FILE_SIZE)}`);
+                return;
+            }
+
+            addAttachment(file, 'file');
+        });
+
+        // Reset input
+        event.target.value = '';
+    }
+
+    function addAttachment(file, type) {
+        const attachment = {
+            id: Date.now() + Math.random(),
+            file: file,
+            type: type,
+            name: file.name,
+            size: file.size
+        };
+
+        attachments.push(attachment);
+        updateAttachmentsPreview();
+    }
+
+    function removeAttachment(id) {
+        attachments = attachments.filter(att => att.id !== id);
+        updateAttachmentsPreview();
+    }
+
+    function updateAttachmentsPreview() {
+        if (attachments.length === 0) {
+            attachmentsPreview.style.display = 'none';
+            return;
+        }
+
+        attachmentsPreview.style.display = 'block';
+        previewList.innerHTML = '';
+
+        attachments.forEach(attachment => {
+            const item = document.createElement('div');
+            item.className = 'attachment-item';
+
+            if (attachment.type === 'image') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    item.innerHTML = `
+                        <img src="${e.target.result}" alt="${attachment.name}">
+                        <div class="file-info">
+                            <div class="file-name">${attachment.name}</div>
+                            <div class="file-size">${formatFileSize(attachment.size)}</div>
+                        </div>
+                        <button class="remove-attachment" onclick="removeAttachment(${attachment.id})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                };
+                reader.readAsDataURL(attachment.file);
+            } else {
+                item.innerHTML = `
+                    <i class="fas fa-file" style="font-size: 20px; color: var(--text-light);"></i>
+                    <div class="file-info">
+                        <div class="file-name">${attachment.name}</div>
+                        <div class="file-size">${formatFileSize(attachment.size)}</div>
+                    </div>
+                    <button class="remove-attachment" onclick="removeAttachment(${attachment.id})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+            }
+
+            previewList.appendChild(item);
+        });
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
     function sendMessage(message) {
         if(isSending) return;
 
@@ -866,14 +1098,36 @@ document.addEventListener('DOMContentLoaded', function() {
         sendBtn.disabled = true;
         sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-        fetch(`/admin/support/conversation/${conversationId}/message`, {
-            method: 'POST',
-            headers: {
+        // Tạo FormData nếu có attachments
+        let requestBody;
+        let headers;
+
+        if (attachments.length > 0) {
+            const formData = new FormData();
+            formData.append('message', message);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            attachments.forEach((attachment, index) => {
+                formData.append(`attachments[${index}]`, attachment.file);
+            });
+
+            requestBody = formData;
+            headers = {
+                'Accept': 'application/json'
+            };
+        } else {
+            requestBody = JSON.stringify({ message: message });
+            headers = {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json'
-            },
-            body: JSON.stringify({ message: message })
+            };
+        }
+
+        fetch(`/admin/support/conversation/${conversationId}/message`, {
+            method: 'POST',
+            headers: headers,
+            body: requestBody
         })
         .then(res => res.json())
         .then(data => {
@@ -881,6 +1135,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 addMessageToUI(message, 'admin', data.message_id);
                 chatInput.value = '';
                 chatInput.style.height = 'auto';
+
+                // Xóa attachments sau khi gửi thành công
+                if (attachments.length > 0) {
+                    attachments = [];
+                    updateAttachmentsPreview();
+                }
 
                 // Bắt đầu realtime nếu chưa bật
                 if(!isRealtimeEnabled) {
@@ -932,13 +1192,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if(senderType === 'admin') {
             const messageStatus = document.createElement('div');
             messageStatus.className = 'message-status';
-            messageStatus.innerHTML = '<i class="fas fa-check-double"></i><span>Đã xem</span>';
+            messageStatus.innerHTML = '';
             messageDiv.appendChild(messageStatus);
         }
 
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
-        
+
         // Lưu tin nhắn vào recentMessages để tránh trùng lặp
         const messageData = {
             content: message.trim(),
@@ -946,14 +1206,14 @@ document.addEventListener('DOMContentLoaded', function() {
             timestamp: new Date().getTime(),
             messageId: messageId
         };
-        
+
         recentMessages.push(messageData);
-        
+
         // Giữ chỉ MAX_RECENT_MESSAGES tin nhắn gần nhất
         if(recentMessages.length > MAX_RECENT_MESSAGES) {
             recentMessages.shift();
         }
-        
+
         console.log('Added message to UI:', messageData);
     }
 
@@ -975,19 +1235,19 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if(data.success && data.messages && data.messages.length > 0) {
                     console.log('Received new messages:', data.messages.length);
-                    
+
                     data.messages.forEach(msg => {
                         // Kiểm tra xem tin nhắn đã tồn tại chưa để tránh duplicate
                         const existingMessage = document.querySelector(`[data-message-id="${msg.id}"]`);
-                        
+
                         if(!existingMessage && msg.id > lastMessageId) {
                             // Kiểm tra thêm xem có tin nhắn trùng nội dung không
                             const duplicateContent = checkDuplicateMessage(msg.message, msg.sender_type);
-                            
+
                             if(!duplicateContent) {
                                 addMessageToUI(msg.message, msg.sender_type, msg.id, msg.created_at);
                                 lastMessageId = Math.max(lastMessageId, msg.id);
-                                
+
                                 // Thông báo khi có tin nhắn mới từ user
                                 if(msg.sender_type === 'user') {
                                     showAdminChatInfo('Có tin nhắn mới từ khách hàng!');
@@ -1016,16 +1276,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const trimmedContent = messageContent.trim();
         const now = new Date().getTime();
         const DUPLICATE_THRESHOLD = 10000; // 10 giây
-        
+
         // Kiểm tra trong recentMessages
         for(let i = recentMessages.length - 1; i >= 0; i--) {
             const recentMsg = recentMessages[i];
-            
+
             // Kiểm tra nội dung và sender type
             if(recentMsg.content === trimmedContent && recentMsg.senderType === senderType) {
                 // Kiểm tra thời gian
                 const timeDiff = now - recentMsg.timestamp;
-                
+
                 if(timeDiff < DUPLICATE_THRESHOLD) {
                     console.log('Duplicate detected in recentMessages:', {
                         content: trimmedContent,
@@ -1037,19 +1297,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
-        
+
         // Kiểm tra thêm trong DOM (backup)
         const messages = document.querySelectorAll('.message');
         const recentDOMMessages = Array.from(messages).slice(-3);
-        
+
         for(let i = recentDOMMessages.length - 1; i >= 0; i--) {
             const message = recentDOMMessages[i];
             const messageBubble = message.querySelector('.message-bubble');
-            
+
             if(messageBubble) {
                 const existingContent = messageBubble.textContent.trim();
                 const existingSenderType = message.classList.contains('sent') ? 'admin' : 'user';
-                
+
                 if(existingContent === trimmedContent && existingSenderType === senderType) {
                     console.log('Duplicate detected in DOM:', {
                         content: trimmedContent,
@@ -1059,7 +1319,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
-        
+
         return false; // Không trùng lặp
     }
 
@@ -1074,7 +1334,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         chatMessages.appendChild(errorDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
-        
+
         // Tự động ẩn sau 5 giây
         setTimeout(() => {
             if (errorDiv.parentNode) {
@@ -1094,7 +1354,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         chatMessages.appendChild(infoDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
-        
+
         // Tự động ẩn sau 3 giây
         setTimeout(() => {
             if (infoDiv.parentNode) {
@@ -1114,7 +1374,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         chatMessages.appendChild(successDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
-        
+
         // Tự động ẩn sau 3 giây
         setTimeout(() => {
             if (successDiv.parentNode) {
@@ -1137,6 +1397,156 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('input', function() {
         // TODO: Implement search logic
         console.log('Searching for:', this.value);
+    });
+
+    // Function to check online status
+    function checkOnlineStatus() {
+        const userId = {{ $conversation['user']->id ?? 'null' }};
+        if (!userId) return;
+
+        fetch(`/admin/support/conversation/${conversationId}/user-status?user_id=${userId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const isOnline = data.status === 'online';
+                    const lastSeen = data.last_seen;
+
+                                         // Cập nhật UI
+                     onlineIndicator.style.backgroundColor = isOnline ? 'var(--online-color)' : 'var(--offline-color)';
+
+                    if (isOnline) {
+                        statusText.textContent = 'Online';
+                    } else {
+                        if (lastSeen) {
+                            const lastSeenDate = new Date(lastSeen);
+                            const now = new Date();
+                            const diffMinutes = Math.floor((now - lastSeenDate) / (1000 * 60));
+
+                            if (diffMinutes < 1) {
+                                statusText.textContent = 'Vừa offline';
+                            } else if (diffMinutes < 60) {
+                                statusText.textContent = `Offline ${diffMinutes} phút trước`;
+                            } else {
+                                const diffHours = Math.floor(diffMinutes / 60);
+                                statusText.textContent = `Offline ${diffHours} giờ trước`;
+                            }
+                        } else {
+                            statusText.textContent = 'Offline';
+                        }
+                    }
+                }
+            })
+                         .catch(error => {
+                 console.error('Error checking online status:', error);
+                 onlineIndicator.style.backgroundColor = 'var(--neutral-color)';
+                 statusText.textContent = 'Lỗi kết nối';
+             });
+    }
+
+    // Function to start user status monitoring
+    function startUserStatusMonitoring() {
+        // Kiểm tra trạng thái mỗi 30 giây
+        userStatusCheckInterval = setInterval(checkOnlineStatus, 30000);
+
+        // Kiểm tra lần đầu
+        checkOnlineStatus();
+    }
+
+    // Function to stop user status monitoring
+    function stopUserStatusMonitoring() {
+        if (userStatusCheckInterval) {
+            clearInterval(userStatusCheckInterval);
+        }
+    }
+
+    // Function to send heartbeat (simulate user activity)
+    function sendHeartbeat() {
+        const userId = {{ $conversation['user']->id ?? 'null' }};
+        if (!userId) return;
+
+        fetch(`/admin/support/conversation/${conversationId}/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                status: 'online',
+                user_id: userId
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Heartbeat sent successfully');
+            }
+        })
+        .catch(error => {
+            console.error('Error sending heartbeat:', error);
+        });
+    }
+
+    // Start heartbeat when page becomes visible
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            sendHeartbeat();
+        }
+    });
+
+    // Send heartbeat when user interacts with the page
+    document.addEventListener('mousemove', function() {
+        sendHeartbeat();
+    });
+
+    document.addEventListener('keypress', function() {
+        sendHeartbeat();
+    });
+
+    // Send heartbeat when user scrolls
+    document.addEventListener('scroll', function() {
+        sendHeartbeat();
+    });
+
+    // Send heartbeat when user clicks
+    document.addEventListener('click', function() {
+        sendHeartbeat();
+    });
+
+    // Cleanup when page is unloaded
+    window.addEventListener('beforeunload', function() {
+        const userId = {{ $conversation['user']->id ?? 'null' }};
+        if (!userId) return;
+
+        // Gửi request để đánh dấu user offline
+        navigator.sendBeacon(`/admin/support/conversation/${conversationId}/status`, JSON.stringify({
+            status: 'offline',
+            user_id: userId
+        }));
+    });
+
+    // Cleanup when page is hidden
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            const userId = {{ $conversation['user']->id ?? 'null' }};
+            if (!userId) return;
+
+            // Gửi request để đánh dấu user offline
+            fetch(`/admin/support/conversation/${conversationId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    status: 'offline',
+                    user_id: userId
+                })
+            }).catch(error => {
+                console.error('Error marking user offline:', error);
+            });
+        }
     });
 });
 </script>

@@ -6,6 +6,7 @@ use App\Services\SupportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use App\Models\SupportMessage;
 
 class SupportController extends Controller
@@ -31,6 +32,11 @@ class SupportController extends Controller
     public function showConversation($conversationId)
     {
         $userId = Auth::id();
+
+        // Cập nhật hoạt động của user
+        Cache::put("user_last_activity_{$userId}", now(), 300);
+        Cache::put("user_status_{$userId}", 'online', 300);
+
         $messages = $this->supportService->getConversationMessages($conversationId);
 
         // Kiểm tra quyền truy cập
@@ -50,10 +56,13 @@ class SupportController extends Controller
         try {
             $request->validate([
                 'message' => 'required|string|min:1|max:1000',
+                'attachments.*' => 'nullable|file|max:10240', // 10MB max
             ], [
                 'message.required' => 'Vui lòng nhập tin nhắn',
                 'message.min' => 'Tin nhắn phải có ít nhất 1 ký tự',
-                'message.max' => 'Tin nhắn không được quá 1000 ký tự'
+                'message.max' => 'Tin nhắn không được quá 1000 ký tự',
+                'attachments.*.file' => 'Tệp đính kèm không hợp lệ',
+                'attachments.*.max' => 'Tệp đính kèm không được quá 10MB'
             ]);
 
             $messageText = trim($request->input('message'));
@@ -102,12 +111,36 @@ class SupportController extends Controller
                 }
 
                 // Gửi tin nhắn mới
+                // Cập nhật hoạt động của user
+                Cache::put("user_last_activity_{$userId}", now(), 300);
+                Cache::put("user_status_{$userId}", 'online', 300);
+
+                // Xử lý attachments nếu có
+                $attachments = [];
+                if ($request->hasFile('attachments')) {
+                    foreach ($request->file('attachments') as $file) {
+                        if ($file->isValid()) {
+                            $fileName = time() . '_' . $file->getClientOriginalName();
+                            $filePath = $file->storeAs('support_attachments', $fileName, 'public');
+
+                            $attachments[] = [
+                                'original_name' => $file->getClientOriginalName(),
+                                'file_path' => $filePath,
+                                'file_size' => $file->getSize(),
+                                'mime_type' => $file->getMimeType()
+                            ];
+                        }
+                    }
+                }
+
                 try {
                     $message = $this->supportService->sendMessage(
                         $conversationId,
                         $userId,
                         'user',
-                        $messageText
+                        $messageText,
+                        null, // subject
+                        $attachments
                     );
                     Log::info("Message sent to conversation {$conversationId} by user {$userId}");
                 } catch (\Exception $e) {
@@ -188,6 +221,44 @@ class SupportController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra'
+            ], 500);
+        }
+    }
+
+    /**
+     * Cập nhật trạng thái online/offline của user
+     */
+    public function updateStatus(Request $request, $conversationId)
+    {
+        try {
+            $request->validate([
+                'status' => 'required|in:online,offline'
+            ]);
+
+            $status = $request->input('status');
+            $userId = Auth::id();
+
+            // Cập nhật trạng thái trong cache
+            $key = "user_online_status_{$userId}";
+            $expiry = $status === 'online' ? 300 : 60; // 5 phút cho online, 1 phút cho offline
+
+            cache()->put($key, [
+                'status' => $status,
+                'last_seen' => now(),
+                'conversation_id' => $conversationId
+            ], $expiry);
+
+            return response()->json([
+                'success' => true,
+                'status' => $status,
+                'last_seen' => now()->toISOString()
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating user status: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể cập nhật trạng thái'
             ], 500);
         }
     }

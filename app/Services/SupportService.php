@@ -10,16 +10,23 @@ use Illuminate\Support\Facades\Log;
 
 class SupportService implements SupportServiceInterface
 {
-    public function sendMessage($conversationId, $senderId, $senderType, $message, $subject = null)
+    public function sendMessage($conversationId, $senderId, $senderType, $message, $subject = null, $attachments = [])
     {
-        return SupportMessage::create([
+        $messageData = [
             'sender_id' => $senderId,
             'sender_type' => $senderType,
             'subject' => $subject,
             'conversation_id' => $conversationId,
             'message' => $message,
             'is_read' => $senderType === 'admin' ? true : false,
-        ]);
+        ];
+
+        // Nếu có attachments, lưu thông tin vào message
+        if (!empty($attachments)) {
+            $messageData['attachments'] = json_encode($attachments);
+        }
+
+        return SupportMessage::create($messageData);
     }
 
     public function getNewMessages($conversationId, $lastId)
@@ -42,7 +49,7 @@ class SupportService implements SupportServiceInterface
         if ($existingConversation) {
             // Nếu user đã có conversation, sử dụng conversation đó
             $conversationId = $existingConversation->conversation_id;
-            
+
             // Gửi tin nhắn mới vào conversation hiện có
             $message = SupportMessage::create([
                 'sender_id' => $userId,
