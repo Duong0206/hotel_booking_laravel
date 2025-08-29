@@ -1,44 +1,104 @@
-// Chat Widget JavaScript
-document.addEventListener('DOMContentLoaded', function () {
-    const openBtn = document.getElementById('openChatModal');
-    const chatBox = document.getElementById('chatBox');
-    const closeBtn = document.getElementById('closeChatBox');
-    const chatInput = document.getElementById('chatInput');
-    const chatForm = document.getElementById('chatForm');
-    const chatMessages = document.querySelector('#chatMessages');
-    const conversationIdInput = document.getElementById('conversationIdInput');
+document.addEventListener('DOMContentLoaded', function() {
+  const openBtn = document.getElementById('openChatModal');
+  const chatBox = document.getElementById('chatBox');
+  const closeBtn = document.getElementById('closeChatBox');
+  const chatInput = document.getElementById('chatInput');
+  const chatForm = document.getElementById('chatForm');
+  const chatMessages = document.querySelector('#chatMessages');
+  const conversationIdInput = document.getElementById('conversationIdInput');
 
-    // File upload elements
-    const attachmentInput = document.getElementById('attachmentInput');
-    const filePreview = document.getElementById('filePreview');
-    const fileName = document.getElementById('fileName');
-    const removeFile = document.getElementById('removeFile');
+  // File upload elements
+  const attachmentInput = document.getElementById('attachmentInput');
+  const filePreview = document.getElementById('filePreview');
+  const fileName = document.getElementById('fileName');
+  const removeFile = document.getElementById('removeFile');
 
-    // Modal elements
-    const imageModal = document.getElementById('imageModal');
-    const modalImage = document.getElementById('modalImage');
-    const modalClose = document.querySelector('.image-modal-close');
+  // Modal elements
+  const imageModal = document.getElementById('imageModal');
+  const modalImage = document.getElementById('modalImage');
+  const modalClose = document.querySelector('.image-modal-close');
 
-    // Debug info
-    console.log('Chat initialized for user:', window.currentUserId || 'unknown');
-    console.log('Conversation ID:', conversationIdInput ? conversationIdInput.value : 'none');
+  // Debug info
+  console.log('Chat initialized for user:', window.currentUserId || 'unknown');
+  console.log('Conversation ID:', conversationIdInput ? conversationIdInput.value : 'none');
 
-    // Biến để lưu trạng thái realtime
-    let isRealtimeEnabled = false;
-    let lastMessageId = 0;
-    let isSending = false;
-    let unreadCount = 0;
-    let messageCount = 1;
-    let newMessageCount = 0;
-    let realtimeInterval = null;
+  // Biến để lưu trạng thái realtime
+  let isRealtimeEnabled = false;
+  let lastMessageId = 0;
+  let isSending = false;
+  let unreadCount = 0;
+  let messageCount = 1;
+  let newMessageCount = 0;
+  let realtimeInterval = null;
 
-    // Khởi tạo lastMessageId từ tin nhắn cuối cùng và đếm số tin nhắn
-    if (chatMessages) {
-        const lastMessage = chatMessages.querySelector('.message[data-message-id]:last-child');
-        if (lastMessage) {
-            lastMessageId = parseInt(lastMessage.getAttribute('data-message-id'));
-            console.log('Last message ID:', lastMessageId);
-        }
+  // Khởi tạo lastMessageId từ tin nhắn cuối cùng và đếm số tin nhắn
+  if(chatMessages) {
+    const lastMessage = chatMessages.querySelector('.message[data-message-id]:last-child');
+    if (lastMessage) {
+      lastMessageId = parseInt(lastMessage.getAttribute('data-message-id'));
+      console.log('Last message ID:', lastMessageId);
+    }
+  }
+
+  // Hàm cập nhật counter tin nhắn
+  function updateMessageCounter() {
+    const counter = document.getElementById('messageCounter');
+    if(counter) {
+      counter.textContent = `Messages: ${messageCount}`;
+      console.log('Updated message counter to:', messageCount);
+    }
+  }
+
+  // Đếm số tin nhắn hiện tại
+  if(chatMessages) {
+    messageCount = chatMessages.querySelectorAll('.message').length;
+    updateMessageCounter();
+  }
+
+  // Khởi tạo newMessageCount = 0 (chỉ đếm tin nhắn realtime mới)
+  newMessageCount = 0;
+
+  // Hàm cập nhật badge tin nhắn mới trên button
+  function updateNewMessageBadge() {
+    const badge = document.getElementById('chatNotificationBadge');
+    if(badge) {
+      if(newMessageCount > 0) {
+        badge.textContent = newMessageCount;
+        badge.style.display = 'flex';
+        console.log('Updated new message badge to:', newMessageCount);
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  }
+
+  // Hàm phát âm thanh thông báo
+  function playNotificationSound() {
+    try {
+      // Tạo âm thanh thông báo bằng Web Audio API
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Cấu hình âm thanh (tần số 800Hz, âm nhẹ)
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.type = 'sine';
+
+      // Cấu hình âm lượng (fade in/out)
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.6, audioContext.currentTime + 0.1);
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.6);
+
+      // Phát âm thanh trong 0.3 giây
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.6);
+
+      console.log('Notification sound played');
+    } catch (error) {
+      console.log('Could not play notification sound:', error);
     }
 
     // Hàm cập nhật counter tin nhắn

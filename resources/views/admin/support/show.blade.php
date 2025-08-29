@@ -1658,6 +1658,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
                             // Thông báo khi nhận tin nhắn mới từ user
                             if(msg.sender_type === 'user') {
+                                // Phát âm thanh thông báo (to hơn)
+                                try {
+                                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                                    const oscillator = audioContext.createOscillator();
+                                    const gainNode = audioContext.createGain();
+
+                                    oscillator.connect(gainNode);
+                                    gainNode.connect(audioContext.destination);
+
+                                    // Tạo âm sắc nổi bật hơn cho admin (square wave)
+                                    oscillator.frequency.setValueAtTime(900, audioContext.currentTime);
+                                    oscillator.type = 'square';
+
+                                    // Tăng âm lượng và kéo dài hơn 1 chút
+                                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                                    gainNode.gain.linearRampToValueAtTime(0.6, audioContext.currentTime + 0.08);
+                                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.6);
+
+                                    oscillator.start(audioContext.currentTime);
+                                    oscillator.stop(audioContext.currentTime + 0.6);
+                                } catch (e) {
+                                    console.log('Admin notification sound failed:', e);
+                                }
+
                                 showAdminChatInfo('Có tin nhắn mới từ khách hàng!');
                             }
                         }
